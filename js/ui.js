@@ -167,7 +167,7 @@ async function loadRepos(grid, username, skip, notes) {
     const res = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed`);
     if (!res.ok) throw new Error(`GitHub responded ${res.status}`);
     const repos = (await res.json())
-      .filter((r) => !r.fork && !r.archived && r.size > 0 && !skip.has(r.name.toLowerCase()))
+      .filter((r) => !r.fork && !r.archived && r.size > 0 && !skip.has(r.name.toLowerCase()) && !r.name.toLowerCase().endsWith('.github.io'))
       .sort((a, b) => b.stargazers_count - a.stargazers_count || new Date(b.pushed_at) - new Date(a.pushed_at))
       .slice(0, 9);
     if (repos.length) grid.replaceChildren(...repos.map((r, i) => repoCard(r, i, notes)));
