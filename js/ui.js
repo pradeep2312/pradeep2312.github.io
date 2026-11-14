@@ -40,7 +40,10 @@ function hero(c) {
   s.append(top);
 
   const bottom = el('div');
-  const giant = el('div', 'giant reveal', c.shortName || c.name.split(' ')[0]);
+  const giantText = c.shortName || c.name.split(' ')[0];
+  const giant = el('div', 'giant reveal', giantText);
+  // Longer names get smaller letters so the line always fits the screen.
+  giant.style.fontSize = `min(17rem, ${Math.min(15.5, 132 / giantText.length).toFixed(1)}vw)`;
   giant.setAttribute('aria-label', c.name);
   bottom.append(giant);
 

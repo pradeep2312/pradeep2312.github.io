@@ -2,9 +2,9 @@
 // nothing in the 3D code needs to change.
 
 export const CONTENT = {
-  name: 'Sai Pradeep Reddy Kukunooru',
-  // The word shown in giant letters on the first screen.
-  shortName: 'Pradeep',
+  name: 'Sai Pradeep Reddy',
+  // The text shown in giant letters on the first screen.
+  shortName: 'Sai Pradeep Reddy',
   role: 'Full Stack Developer',
   tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems.',
   location: 'United States',
@@ -23,7 +23,7 @@ export const CONTENT = {
 
   skills: [
     'Java', 'Spring Boot', 'Microservices', 'React', 'Angular', 'Kafka', 'gRPC', 'GraphQL',
-    'REST APIs', 'AWS', 'PostgreSQL', 'Docker', 'Python', 'Generative AI', 'RAG', 'Agentic AI',
+    'REST APIs', 'AWS', 'Azure', 'PostgreSQL', 'Docker', 'Python', 'Generative AI', 'RAG', 'Agentic AI',
   ],
 
   education: [
@@ -32,9 +32,12 @@ export const CONTENT = {
   ],
 
   certifications: [
-    { title: 'Claude Certified Architect — Foundations', place: 'Anthropic · 2026' },
-    { title: 'Data Science and Business Analytics', place: 'The Sparks Foundation · 2023' },
-    { title: 'SQL for Data Science', place: 'Great Learning · 2021' },
+    { title: 'Claude Certified Architect — Foundations', place: 'Anthropic' },
+    { title: 'AWS Certified Solutions Architect — Associate', place: 'Amazon Web Services' },
+    { title: 'Azure Solutions Architect Expert', place: 'Microsoft' },
+    { title: 'Generative AI Fundamentals', place: 'Databricks' },
+    { title: 'Oracle Certified AI Foundations Associate', place: 'Oracle' },
+    { title: 'AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents', place: 'Udemy' },
   ],
 
   experience: [
