@@ -1,6 +1,6 @@
-import { CONTENT } from '../content.js';
-import { buildUI } from './ui.js';
-import { initFx } from './fx.js';
+import { CONTENT } from '../content.js?v=3';
+import { buildUI } from './ui.js?v=3';
+import { initFx } from './fx.js?v=3';
 
 const fill = document.getElementById('loader-fill');
 const setProgress = (p) => { fill.style.width = Math.round(Math.min(1, Math.max(0, p)) * 100) + '%'; };
@@ -13,7 +13,7 @@ setProgress(0.2);
 
 // The page stays fully usable if 3D cannot start (no WebGL, blocked CDN).
 try {
-  const { initScene } = await import('./scene.js');
+  const { initScene } = await import('./scene.js?v=3');
   setProgress(0.5);
   await initScene({
     canvas: document.getElementById('scene'),
