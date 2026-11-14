@@ -25,273 +25,290 @@ const section = (id, label) => {
 };
 
 const pad = (n) => String(n).padStart(2, '0');
+const img = (src, alt, cls, lazy = true) => {
+  const i = el('img', cls);
+  i.src = src;
+  i.alt = alt;
+  i.draggable = false;
+  if (lazy) i.loading = 'lazy';
+  return i;
+};
+const kicker = (n, text) => el('div', 'kicker rv', `(${pad(n)}) — ${text}`);
 
-const chips = (items) => {
-  const wrap = el('div', 'chips');
-  items.forEach((t) => wrap.append(el('span', 'chip', t)));
-  return wrap;
+// A two-line display headline; the last line is red.
+const display = (lines, cls = '') => {
+  const h = el('h2', `display rv ${cls}`.trim());
+  lines.forEach((t, i) => h.append(el('span', i === lines.length - 1 ? 'red' : '', t)));
+  return h;
 };
 
-const head = (kicker, title, centered = true) => {
-  const h = el('div', `head reveal${centered ? ' center' : ''}`);
-  h.append(el('div', 'kicker', kicker), el('h2', '', title), el('div', 'rule'));
-  return h;
+// Turns "plain *red* plain" into text with red spans.
+const marked = (text, cls) => {
+  const p = el('p', cls);
+  text.split('*').forEach((part, i) => p.append(i % 2 ? el('mark', '', part) : document.createTextNode(part)));
+  return p;
 };
 
 function hero(c) {
   const s = section('hero');
   const copy = el('div', 'hero-copy');
-  copy.append(el('div', 'kicker', `${c.role} • ${c.location}`));
-  const name = el('h1', 'name');
-  name.setAttribute('aria-label', c.name);
-  (c.nameLines || [c.name]).forEach((t) => {
+  const hello = el('p', 'hello');
+  hello.append(document.createTextNode('Hi, I’m '), el('b', '', c.name), document.createTextNode(' —'));
+  const h1 = el('h1', 'headline');
+  h1.setAttribute('aria-label', c.headline.join(' '));
+  c.headline.forEach((t, i) => {
     const line = el('span', 'line');
-    line.append(el('span', '', t));
-    name.append(line);
+    line.append(el('span', i === c.headline.length - 1 ? 'red' : '', t));
+    h1.append(line);
   });
-  copy.append(name);
-  if (c.focus?.length) {
-    const focus = el('div', 'focus');
-    c.focus.forEach((t, i) => {
-      if (i) focus.append(el('i', '', '/'));
-      focus.append(document.createTextNode(t));
-    });
-    copy.append(focus);
-  }
-  copy.append(el('p', '', c.tagline));
   const cta = el('div', 'cta');
-  cta.append(link('#projects', 'Explore my work', 'btn primary magnetic'), link('#contact', 'Get in touch', 'btn magnetic'));
-  copy.append(cta);
+  cta.append(link('#work', 'See my work ↘', 'btn solid'));
+  const play = el('button', 'btn', '▶ Watch my intro');
+  play.type = 'button';
+  play.id = 'play-intro';
+  cta.append(play);
+  copy.append(hello, h1, el('p', 'lede', c.tagline), cta);
 
   const art = el('div', 'hero-art');
-  const frame = el('div', 'frame tilt');
-  frame.dataset.tilt = '7';
-  const inner = el('div', 'frame-in');
-  if (c.photo) {
-    const img = el('img');
-    img.src = c.photo;
-    img.alt = `Portrait of ${c.name}`;
-    inner.append(img);
-  }
-  frame.append(inner);
-  const t1 = el('div', 'tag t1');
-  t1.append(el('b', '', '● '), document.createTextNode(c.experience[0] ? `Now at ${c.experience[0].company.split(' · ')[0]}` : c.role));
-  const t2 = el('div', 'tag t2');
-  t2.append(document.createTextNode('Claude Certified '), el('b', '', 'Architect'));
-  art.append(frame, t1, t2);
-
-  s.append(copy, art, el('div', 'scroll-cue', 'Scroll ↓'));
+  const giant = el('div', 'giant');
+  giant.setAttribute('aria-hidden', 'true');
+  [...c.giantName].forEach((ch, i) => {
+    const sp = el('span', '', ch);
+    sp.style.transitionDelay = `${0.1 + i * 0.05}s`;
+    giant.append(sp);
+  });
+  art.append(giant, img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo', false));
+  s.append(copy, art);
   return s;
 }
 
-function stats(c) {
-  const s = section('stats');
-  const strip = el('div', 'stats panel reveal');
-  c.stats.forEach((st) => {
-    const d = el('div', 'stat');
-    const b = el('b');
-    // Number in white, its unit or sign in red.
-    const m = st.value.match(/^([\d.]+)(.*)$/);
-    if (m) {
-      b.append(document.createTextNode(m[1]), el('em', '', m[2]));
-      b.dataset.count = m[1];
-    } else {
-      b.textContent = st.value;
-    }
-    d.append(b, el('span', '', st.label));
-    strip.append(d);
+function idCard(c) {
+  const card = el('div', 'idcard');
+  card.tabIndex = 0;
+  card.setAttribute('role', 'button');
+  card.setAttribute('aria-label', 'ID card. Press Enter to flip it.');
+  const inner = el('div', 'idcard-in');
+
+  const front = el('div', 'face front');
+  const photo = el('div', 'id-photo');
+  photo.append(img(c.photos.journey, '', ''));
+  front.append(el('div', 'id-top', 'Portfolio pass'), photo, el('b', '', c.name), el('span', '', c.role), el('em', '', 'Flip ↻'));
+
+  const back = el('div', 'face back');
+  const now = c.experience[0];
+  [['Based in', c.location], ['Currently', now ? `${now.role}, ${now.company.split(' · ')[0]}` : c.role], ['Certified', c.certifications[0]?.title || ''], ['Focus', 'Microservices, React, GenAI']].forEach(([k, v]) => {
+    const row = el('div', 'id-row');
+    row.append(el('span', '', k), el('b', '', v));
+    back.append(row);
   });
-  s.append(strip);
-  return s;
+  back.append(el('div', 'barcode'), el('em', '', 'Flip ↻'));
+
+  inner.append(front, back);
+  card.append(el('div', 'strap'), inner);
+  return card;
 }
 
 function about(c) {
   const s = section('about', 'About');
-  s.append(head('Who I am', 'About me', false));
-  const grid = el('div', 'about');
-  const card = el('div', 'about-card panel reveal');
-  c.about.forEach((p) => card.append(el('p', '', p)));
-  card.append(el('div', 'label', 'Core toolkit'), chips(c.skills));
-  grid.append(card);
-  if (c.photo) {
-    const fig = el('figure', 'photo-card reveal tilt');
-    fig.style.margin = '0';
-    fig.dataset.tilt = '10';
-    const inner = el('div', 'tilt-in');
-    const img = el('img');
-    img.src = c.photo;
-    img.alt = c.name;
-    img.loading = 'lazy';
-    const cap = el('figcaption');
-    cap.append(el('b', '', c.name), document.createTextNode(c.role));
-    inner.append(img, cap);
-    fig.append(inner);
-    grid.append(fig);
-  }
-  s.append(grid);
+  const left = el('div', 'about-photo rv');
+  left.append(el('div', 'blob'), img(c.photos.about, `${c.name}, seated`, ''), idCard(c));
+  const right = el('div', 'about-copy');
+  const tiles = el('div', 'tiles rv');
+  [c.stats[0], c.stats[1], c.stats[3]].forEach((st) => {
+    const t = el('div', 'tile');
+    const m = st.value.match(/^([\d.]+)(.*)$/);
+    const b = el('b');
+    if (m) b.append(document.createTextNode(m[1]), el('i', '', m[2]));
+    else b.textContent = st.value;
+    t.append(b, el('span', '', st.label));
+    tiles.append(t);
+  });
+  right.append(kicker(1, 'About me'), marked(c.statement, 'statement rv'), el('p', 'sub rv', c.about), tiles);
+  s.append(left, right);
   return s;
 }
 
-function experience(c) {
-  const s = section('experience', 'Experience');
-  s.append(head('Career path', 'Experience'));
+function work(c) {
+  const s = section('work', 'Work');
+  const pin = el('div', 'work-pin');
+  const left = el('div', 'work-left');
+  const count = el('div', 'work-count');
+  count.append(el('b', '', '01'), el('span', '', `/ ${pad(c.featured.length)}`), el('i'));
+  const items = el('div', 'work-items');
+  c.featured.forEach((p) => {
+    const it = el('article', 'work-item');
+    it.append(el('div', 'tag', p.tag), el('h3', '', p.name), el('p', '', p.summary));
+    const tech = el('div', 'tech');
+    p.tech.forEach((t) => tech.append(el('span', '', t)));
+    it.append(tech);
+    if (p.code) it.append(link(p.code, 'View on GitHub ↗', 'ghlink'));
+    if (p.live) it.append(link(p.live, 'Live demo ↗', 'ghlink'));
+    items.append(it);
+  });
+  left.append(el('div', 'kicker', '(02) — Selected work'), count, items);
+
+  const stack = el('div', 'wstack');
+  c.featured.forEach((p) => {
+    const card = el('div', 'wcard');
+    card.append(el('b', '', p.card.figure), el('span', '', p.card.label));
+    const rows = el('ul');
+    p.card.rows.forEach((r) => rows.append(el('li', '', r)));
+    card.append(rows);
+    stack.append(card);
+  });
+
+  const photo = el('div', 'work-photo');
+  photo.append(img(c.photos.work, `${c.name} working on a laptop`, ''));
+  pin.append(left, stack, photo);
+  s.append(pin);
+  return s;
+}
+
+function journey(c) {
+  const s = section('journey', 'Journey');
+  const left = el('div', 'journey-photo rv');
+  const firstYear = (c.experience[c.experience.length - 1]?.period.match(/\d{4}/) || [''])[0];
+  const year = el('div', 'year', firstYear);
+  year.setAttribute('aria-hidden', 'true');
+  left.append(year, img(c.photos.journey, `${c.name}, smiling`, ''));
+  const right = el('div', 'journey-copy');
   const line = el('div', 'timeline');
   line.append(el('div', 'timeline-fill'));
   c.experience.forEach((x) => {
-    const card = el('article', 'exp panel reveal');
-    const h = el('div', 'exp-head');
-    h.append(el('h3', '', x.role), el('span', 'period', x.period));
-    card.append(h, el('div', 'company', x.company));
+    const item = el('div', 'tl rv');
+    item.append(el('span', 'period', x.period), el('h3', '', x.role), el('p', 'company', x.company));
     if (x.points?.length) {
+      const d = el('details');
+      d.append(el('summary', '', 'What I did'));
       const ul = el('ul');
       x.points.forEach((p) => ul.append(el('li', '', p)));
-      card.append(ul);
+      d.append(ul);
+      item.append(d);
     }
-    line.append(card);
+    line.append(item);
   });
-  s.append(line);
+  c.education.forEach((e) => {
+    const item = el('div', 'tl rv');
+    item.append(el('span', 'period', 'Education'), el('h3', '', e.title), el('p', 'company', e.place));
+    line.append(item);
+  });
+  right.append(kicker(3, 'The journey so far'), display(c.journeyHeadline), line);
+  s.append(left, right);
   return s;
 }
 
-function projects(c) {
-  const s = section('projects', 'Projects');
-  s.append(head('Featured work', 'Projects'));
-  const flow = el('div', 'flow reveal');
-  flow.tabIndex = 0;
-  flow.setAttribute('aria-label', 'Featured projects. Use the arrow keys to move between them.');
-  c.featured.forEach((p, i) => {
-    const card = el('article', 'pcard');
-    const inner = el('div', 'pcard-in');
-    const shot = el('div', 'pshot');
-    if (p.image) {
-      const img = el('img');
-      img.src = p.image;
-      img.alt = `${p.name} screenshot`;
-      img.loading = 'lazy';
-      img.draggable = false;
-      shot.append(img);
-    }
-    shot.append(el('span', 'num', pad(i + 1)));
-    const body = el('div', 'pbody');
-    body.append(el('h3', '', p.name), el('p', '', p.summary));
-    if (p.tech?.length) body.append(chips(p.tech));
-    const links = el('div', 'links');
-    if (p.code) links.append(link(p.code, 'View code ↗'));
-    if (p.live) links.append(link(p.live, 'Live demo ↗'));
-    body.append(links);
-    inner.append(shot, body);
-    card.append(inner);
-    flow.append(card);
-  });
-  const ui = el('div', 'flow-ui');
-  const prev = el('button', 'flow-prev', '←');
-  prev.type = 'button';
-  prev.setAttribute('aria-label', 'Previous project');
-  const next = el('button', 'flow-next', '→');
-  next.type = 'button';
-  next.setAttribute('aria-label', 'Next project');
-  const dots = el('div', 'flow-dots');
-  c.featured.forEach(() => dots.append(el('i')));
-  ui.append(prev, dots, next);
-  s.append(flow, ui, el('div', 'hint', 'Drag, swipe or use the arrows'));
-  return s;
-}
+function toolkit(c) {
+  const s = section('toolkit', 'Toolkit');
+  const top = el('div', 'tk-top');
+  const headBox = el('div', 'tk-head');
+  headBox.append(kicker(4, 'Toolkit'), display(['Everything', 'in orbit.']));
+  const orbit = el('div', 'orbit');
+  orbit.append(el('div', 'pulse'), el('div', 'pulse p2'), img(c.photos.hero, '', 'orbit-photo'));
+  const names = c.skillGroups.flatMap((g) => g.items.map(([, name]) => name));
+  names.filter((_, i) => i % 2 === 0).slice(0, 10).forEach((n) => orbit.append(el('span', 'chip', n)));
+  top.append(headBox, orbit);
 
-function skills(c) {
-  const s = section('skills', 'Skills');
-  s.append(head('What I work with', 'Technical skills'));
-  const grid = el('div', 'skills');
-  c.skillGroups.forEach((g) => g.items.forEach((name) => {
-    const row = el('div', 'skill panel reveal');
-    row.append(el('b', '', name), el('span', '', g.group));
-    grid.append(row);
+  const tableHead = el('div', 'table-head rv');
+  tableHead.append(el('h3', '', 'The periodic table of what I use'));
+  const legend = el('div', 'legend');
+  c.skillGroups.forEach((g, gi) => {
+    const l = el('span', `g${gi}`);
+    l.append(el('i'), document.createTextNode(g.group));
+    legend.append(l);
+  });
+  tableHead.append(legend);
+  const table = el('div', 'ptable');
+  let n = 0;
+  c.skillGroups.forEach((g, gi) => g.items.forEach(([sym, name]) => {
+    n += 1;
+    const cell = el('div', `elem g${gi} rv`);
+    cell.style.transitionDelay = `${(n % 8) * 0.04}s`;
+    cell.append(el('small', '', pad(n)), el('b', '', sym), el('span', '', name));
+    cell.title = `${name} — ${g.group}`;
+    table.append(cell);
   }));
-  s.append(grid);
+
+  const ticker = el('div', 'ticker');
+  ticker.setAttribute('aria-hidden', 'true');
+  const run = el('div', 'ticker-run');
+  for (let k = 0; k < 2; k++) names.forEach((t) => run.append(el('span', '', t), el('i', '', '✦')));
+  ticker.append(run);
+
+  s.append(top, tableHead, table, ticker);
   return s;
 }
 
-function credentials(c) {
-  const s = section('credentials');
-  s.append(head('Proof of work', 'Credentials'));
-  const grid = el('div', 'creds');
-  [['Certifications', c.certifications], ['Education', c.education]].forEach(([title, items]) => {
-    if (!items?.length) return;
-    const box = el('div', 'cred panel reveal');
-    box.append(el('div', 'label', title));
-    items.forEach((it) => {
-      const row = el('div', 'cred-row');
-      row.append(el('b', '', it.title), el('span', '', it.place));
-      box.append(row);
-    });
-    grid.append(box);
+function awards(c) {
+  const s = section('awards', 'Awards');
+  const pin = el('div', 'aw-pin');
+  const head = el('div', 'aw-head');
+  const tiles = el('div', 'aw-tiles');
+  [...c.stats.slice(0, 3), { value: String(c.certifications.length), label: 'Certifications' }].forEach((st) => {
+    const t = el('div', 'aw-tile');
+    t.append(el('b', '', st.value), el('span', '', st.label));
+    tiles.append(t);
   });
-  s.append(grid);
+  head.append(el('div', 'kicker', '(05) — Proof of work'), tiles);
+  const track = el('div', 'aw-track');
+  c.certifications.forEach((x, i) => {
+    const card = el('div', 'cert');
+    card.append(el('small', '', `Certification ${pad(i + 1)}`), el('b', '', x.title), el('span', '', x.place), el('i', '', '✓'));
+    track.append(card);
+  });
+  pin.append(head, track, el('div', 'aw-hint', 'Keep scrolling →'));
+  s.append(pin);
   return s;
 }
 
-function repoCard(r, notes = {}) {
-  const card = r.html_url ? link(r.html_url, '', 'repo panel') : el('div', 'repo panel');
-  card.append(el('h3', '', r.name), el('p', '', r.description || notes[r.name] || ''));
-  const meta = el('div', 'meta');
-  if (r.language) {
-    const lang = el('span');
-    lang.append(el('i'), document.createTextNode(r.language));
-    meta.append(lang);
-  }
-  if (r.stargazers_count) meta.append(el('span', '', `★ ${r.stargazers_count}`));
-  card.append(meta);
-  return card;
+function repoRow(r, notes = {}) {
+  const row = link(r.html_url, '', 'repo');
+  row.append(el('b', '', r.name), el('span', '', r.description || notes[r.name] || ''), el('em', '', r.language || ''), el('i', '', '↗'));
+  return row;
 }
 
-async function loadRepos(sectionEl, grid, username, skip, notes) {
+async function loadRepos(sectionEl, list, username, skip, notes) {
   try {
     const res = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed`);
     if (!res.ok) throw new Error(`GitHub responded ${res.status}`);
     const repos = (await res.json())
       .filter((r) => !r.fork && !r.archived && r.size > 0 && !skip.has(r.name.toLowerCase()) && !r.name.toLowerCase().endsWith('.github.io'))
       .sort((a, b) => b.stargazers_count - a.stargazers_count || new Date(b.pushed_at) - new Date(a.pushed_at))
-      .slice(0, 8);
+      .slice(0, 6);
     if (!repos.length) throw new Error('no repositories to show');
-    grid.replaceChildren(...repos.map((r) => repoCard(r, notes)));
+    list.replaceChildren(...repos.map((r) => repoRow(r, notes)));
     sectionEl.hidden = false;
   } catch (err) {
     console.warn('Could not load GitHub projects:', err);
   }
 }
 
-function repos(c) {
+function more(c) {
   const s = section('more');
   s.hidden = true; // shown once the list has loaded
-  s.append(head('Open source', 'More on GitHub'));
-  const grid = el('div', 'repo-grid');
-  s.append(grid);
-  if (c.githubUsername) loadRepos(s, grid, c.githubUsername, new Set(c.featured.map((p) => (p.repo || p.name).toLowerCase())), c.repoNotes || {});
+  const list = el('div', 'repos');
+  s.append(el('div', 'kicker', '(06) — More on GitHub'), list);
+  if (c.githubUsername) loadRepos(s, list, c.githubUsername, new Set(c.featured.map((p) => (p.repo || p.name).toLowerCase())), c.repoNotes || {});
   return s;
 }
 
 function contact(c) {
   const s = section('contact', 'Contact');
   const k = c.contact;
-  const wrap = el('div', 'reveal');
-  wrap.append(el('div', 'kicker', 'Get in touch'), el('h2', '', k.heading.replace(/\.$/, '')), el('p', 'note', k.note));
-  const links = el('div', 'cta');
-  if (k.email) links.append(link('mailto:' + k.email, 'Email me', 'btn primary magnetic'));
-  if (k.linkedin) links.append(link(k.linkedin, 'LinkedIn ↗', `btn magnetic${k.email ? '' : ' primary'}`));
-  if (k.github) links.append(link(k.github, 'GitHub ↗', 'btn magnetic'));
-  if (k.resume) links.append(link(k.resume, 'Résumé ↓', 'btn magnetic'));
-  wrap.append(links);
-  s.append(wrap, el('div', 'foot', `© ${new Date().getFullYear()} ${c.name}`));
+  const links = el('div', 'cta rv');
+  if (k.email) links.append(link('mailto:' + k.email, 'Email me', 'btn solid'));
+  if (k.linkedin) links.append(link(k.linkedin, 'LinkedIn ↗', `btn${k.email ? '' : ' solid'}`));
+  if (k.github) links.append(link(k.github, 'GitHub ↗', 'btn'));
+  if (k.resume) links.append(link(k.resume, 'Download résumé', 'btn'));
+  s.append(kicker(7, 'Contact'), display(k.heading, 'huge'), el('p', 'note rv', k.note), links, el('div', 'foot', `© ${new Date().getFullYear()} ${c.name}`));
   return s;
 }
 
 export function buildUI(c) {
   document.title = `${c.name} — ${c.role}`;
   document.querySelector('meta[name="description"]').content = c.tagline;
-  document.documentElement.style.setProperty('--accent', c.theme.accent);
-  document.documentElement.style.setProperty('--accent2', c.theme.accent2);
 
   const brand = document.getElementById('brand');
-  brand.append(el('b', '', c.name[0]), document.createTextNode(c.name.slice(1) + '.'));
+  brand.append(document.createTextNode(c.giantName), el('i'));
 
   // Loader: the name rises in letter by letter.
   const loaderName = document.getElementById('loader-name');
@@ -301,7 +318,7 @@ export function buildUI(c) {
     loaderName.append(span);
   });
 
-  const sections = [hero(c), stats(c), about(c), experience(c), projects(c), skills(c), credentials(c), repos(c), contact(c)];
+  const sections = [hero(c), about(c), work(c), journey(c), toolkit(c), awards(c), more(c), contact(c)];
   document.getElementById('app').append(...sections);
 
   const nav = document.getElementById('nav-links');
@@ -310,6 +327,4 @@ export function buildUI(c) {
     a.dataset.for = s.id;
     nav.append(a);
   });
-
-  return { sections };
 }

@@ -1,21 +1,33 @@
 // All the text on the site lives here. Edit this file to update the portfolio;
-// nothing in the 3D code needs to change.
+// nothing in the layout or animation code needs to change.
 
 export const CONTENT = {
   name: 'Sai Pradeep Reddy',
-  // How the name is split across lines on the first screen.
-  nameLines: ['Sai', 'Pradeep', 'Reddy'],
-  photo: 'assets/portrait.webp',
-  // Short line under the name on the first screen.
-  focus: ['Spring Boot', 'React', 'Agentic AI'],
+  // The word shown in giant red letters behind the photo on the first screen.
+  giantName: 'Pradeep',
   role: 'Full Stack Developer',
-  tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems.',
+  // First-screen headline; the last line is shown in red.
+  headline: ['Full-stack', 'Developer.'],
+  tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems. From payment microservices to clinical AI summaries, I like turning hard problems into software people rely on.',
   location: 'United States',
 
-  about: [
-    'Full stack developer with 5+ years of experience building enterprise software for healthcare and financial services, most recently at Quest Diagnostics and Goldman Sachs.',
-    'My work spans Java and Spring Boot microservices, React and Angular front ends, and event streaming with Kafka. Lately I focus on generative AI: retrieval-augmented generation, agentic workflows and AI features inside production systems. I hold a Master’s in Computer Science from the University of Missouri-Kansas City and am a Claude Certified Architect (Foundations).',
-  ],
+  photos: {
+    hero: 'assets/stand.png',
+    about: 'assets/seated.png',
+    work: 'assets/typing.png',
+    journey: 'assets/smile.png',
+  },
+
+  // The intro video. "file" is a video file in this folder (for example
+  // 'assets/intro.mp4'); when it is empty, the HeyGen player opens instead.
+  intro: {
+    file: '',
+    embed: 'https://app.heygen.com/embeds/d5e0396f41864d9b81f1b7ef2c119aa1',
+  },
+
+  // Words between *stars* are shown in red.
+  statement: 'Full stack developer who loves *shipping*. I turn messy enterprise problems into *products* people actually use: clean APIs, fast microservices and *AI features* that hold up in production.',
+  about: 'Five-plus years across healthcare and financial services, most recently at Quest Diagnostics and Goldman Sachs. Master’s in Computer Science from the University of Missouri-Kansas City, and a Claude Certified Architect.',
 
   stats: [
     { value: '5+', label: 'Years of experience' },
@@ -24,17 +36,12 @@ export const CONTENT = {
     { value: '40%', label: 'Faster chart review' },
   ],
 
-  skills: [
-    'Java', 'Spring Boot', 'Microservices', 'React', 'Angular', 'Kafka', 'gRPC', 'GraphQL',
-    'REST APIs', 'AWS', 'Azure', 'PostgreSQL', 'Docker', 'Python', 'Generative AI', 'RAG', 'Agentic AI',
-  ],
-
-  // The "Technical skills" grid.
+  // The "periodic table" of skills. Each item is [symbol, name].
   skillGroups: [
-    { group: 'Backend', items: ['Java', 'Spring Boot', 'Microservices', 'Apache Kafka', 'gRPC', 'GraphQL', 'REST APIs'] },
-    { group: 'Frontend', items: ['React', 'Angular', 'TypeScript'] },
-    { group: 'Cloud and data', items: ['AWS', 'Azure', 'Docker', 'PostgreSQL'] },
-    { group: 'AI', items: ['Generative AI', 'RAG', 'Agentic AI', 'LLM Engineering', 'Python'] },
+    { group: 'Backend', items: [['Jv', 'Java'], ['Sb', 'Spring Boot'], ['Ms', 'Microservices'], ['Kf', 'Apache Kafka'], ['Gr', 'gRPC'], ['Gq', 'GraphQL'], ['Rs', 'REST APIs']] },
+    { group: 'Frontend', items: [['Re', 'React'], ['Ng', 'Angular'], ['Ts', 'TypeScript']] },
+    { group: 'Cloud and data', items: [['Aw', 'AWS'], ['Az', 'Azure'], ['Dk', 'Docker'], ['Pg', 'PostgreSQL']] },
+    { group: 'AI', items: [['Ga', 'Generative AI'], ['Rg', 'RAG'], ['Ag', 'Agentic AI'], ['Lm', 'LLM Engineering'], ['Py', 'Python']] },
   ],
 
   education: [
@@ -51,6 +58,7 @@ export const CONTENT = {
     { title: 'AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents', place: 'Udemy' },
   ],
 
+  journeyHeadline: ['Building', 'at scale.'],
   experience: [
     {
       role: 'Full Stack Java Developer',
@@ -72,69 +80,57 @@ export const CONTENT = {
         'Built fault-tolerant Apache Kafka streaming pipelines handling over 1M financial events daily.',
       ],
     },
-    {
-      role: 'Full Stack Developer',
-      company: 'Humana · Louisville, Kentucky',
-      period: 'Sep 2023 — Aug 2024',
-      points: [],
-    },
-    {
-      role: 'Full Stack Developer',
-      company: 'USAA · San Antonio, Texas',
-      period: 'Jan 2023 — Sep 2023',
-      points: [],
-    },
-    {
-      role: 'Software Engineer',
-      company: 'CMS IT Services · Hyderabad, India',
-      period: 'Jan 2021 — Nov 2022',
-      points: [],
-    },
+    { role: 'Full Stack Developer', company: 'Humana · Louisville, Kentucky', period: 'Sep 2023 — Aug 2024', points: [] },
+    { role: 'Full Stack Developer', company: 'USAA · San Antonio, Texas', period: 'Jan 2023 — Sep 2023', points: [] },
+    { role: 'Software Engineer', company: 'CMS IT Services · Hyderabad, India', period: 'Jan 2021 — Nov 2022', points: [] },
   ],
 
-  // The projects shown as large cards and as billboards in the city.
-  // repo: the GitHub repository name, so it is not repeated in the grid below.
-  // image: path to a screenshot (for example 'assets/ai-news-agent.png'), or '' for none.
+  // The projects in the "Work" section. Each one has a small red card:
+  // a big figure, a label under it, and up to four short rows.
   featured: [
     {
       name: 'AI News Agent',
       repo: 'ai-news-agent',
-      summary: 'A personal news automation service. It collects articles from RSS feeds, removes duplicates, categorizes and ranks them, writes a daily AI-generated digest and sends it to Telegram.',
+      tag: 'AI automation',
+      summary: 'A personal news service that collects RSS articles, removes duplicates, ranks them and sends an AI-written daily digest to Telegram.',
       tech: ['Java 21', 'Spring Boot', 'PostgreSQL', 'OpenAI API', 'Docker'],
-      image: '',
+      card: { figure: '1–10', label: 'Importance score', rows: ['RSS feeds collected', 'Duplicates removed', 'Articles ranked', 'Digest sent to Telegram'] },
       code: 'https://github.com/pradeep2312/ai-news-agent',
       live: '',
     },
     {
       name: 'Enterprise Knowledge Assistant',
       repo: 'AI_Enterprise_Knowledge_Assistant',
-      summary: 'A retrieval-augmented assistant for company documents. It parses and chunks PDFs, stores embeddings in pgvector, reranks the matches and answers questions through a React interface.',
+      tag: 'RAG',
+      summary: 'A retrieval-augmented assistant that parses company PDFs, stores embeddings in pgvector, reranks matches and answers questions in a React interface.',
       tech: ['Python', 'FastAPI', 'pgvector', 'React', 'TypeScript'],
-      image: '',
+      card: { figure: 'RAG', label: 'Retrieval pipeline', rows: ['PDFs parsed and chunked', 'Embeddings in pgvector', 'Matches reranked', 'Answers in a React UI'] },
       code: 'https://github.com/pradeep2312/AI_Enterprise_Knowledge_Assistant',
       live: '',
     },
     {
       name: 'Fake News Detection',
       repo: 'Fake-News-Detection',
-      summary: 'An LSTM model that classifies news articles as real or fake with 94.24% accuracy, served through a Streamlit web app.',
+      tag: 'Machine learning',
+      summary: 'An LSTM model that classifies news articles as real or fake, served through a Streamlit web app.',
       tech: ['Python', 'LSTM', 'NLP', 'Streamlit'],
-      image: '',
+      card: { figure: '94%', label: 'Accuracy', rows: ['Embedding layer', 'LSTM layer', 'Dense layer', 'Streamlit app'] },
       code: 'https://github.com/pradeep2312/Fake-News-Detection',
       live: '',
     },
     {
       name: 'IoT Weather Station',
       repo: 'Weather-Station-IOT-',
-      summary: 'An ESP32 station that measures weather and air-particle levels, publishes readings over MQTT to Google Cloud and shows them on a live web dashboard.',
+      tag: 'IoT',
+      summary: 'An ESP32 station that measures weather and air-particle levels, publishes readings over MQTT to Google Cloud and shows them on a live dashboard.',
       tech: ['ESP32', 'C++', 'MQTT', 'React', 'GCP'],
-      image: '',
+      card: { figure: 'MQTT', label: 'Live telemetry', rows: ['ESP32 sensors', 'Temperature and humidity', 'Google Cloud broker', 'React dashboard'] },
       code: 'https://github.com/pradeep2312/Weather-Station-IOT-',
       live: '',
     },
   ],
 
-  // The "More on GitHub" grid is filled live from this account.
+  // The "More on GitHub" list is filled live from this account.
   githubUsername: 'pradeep2312',
   // Shown when a repository has no description on GitHub.
   repoNotes: {
@@ -145,16 +141,11 @@ export const CONTENT = {
   },
 
   contact: {
-    heading: 'Let’s build something.',
+    heading: ['Let’s build', 'something.'],
     note: 'Open to new roles and interesting projects.',
     email: '',
     github: 'https://github.com/pradeep2312',
     linkedin: 'https://www.linkedin.com/in/saipradeepreddy/',
     resume: '',
-  },
-
-  theme: {
-    accent: '#ff2d2d',
-    accent2: '#ff6a1f',
   },
 };
