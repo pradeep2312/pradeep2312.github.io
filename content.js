@@ -3,8 +3,11 @@
 
 export const CONTENT = {
   name: 'Sai Pradeep Reddy',
-  // The text shown in giant letters on the first screen.
-  shortName: 'Sai Pradeep Reddy',
+  // How the name is split across lines on the first screen.
+  nameLines: ['Sai', 'Pradeep', 'Reddy'],
+  photo: 'assets/portrait.webp',
+  // Short line under the name on the first screen.
+  focus: ['Spring Boot', 'React', 'Agentic AI'],
   role: 'Full Stack Developer',
   tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems.',
   location: 'United States',
@@ -24,6 +27,14 @@ export const CONTENT = {
   skills: [
     'Java', 'Spring Boot', 'Microservices', 'React', 'Angular', 'Kafka', 'gRPC', 'GraphQL',
     'REST APIs', 'AWS', 'Azure', 'PostgreSQL', 'Docker', 'Python', 'Generative AI', 'RAG', 'Agentic AI',
+  ],
+
+  // The "Technical skills" grid.
+  skillGroups: [
+    { group: 'Backend', items: ['Java', 'Spring Boot', 'Microservices', 'Apache Kafka', 'gRPC', 'GraphQL', 'REST APIs'] },
+    { group: 'Frontend', items: ['React', 'Angular', 'TypeScript'] },
+    { group: 'Cloud and data', items: ['AWS', 'Azure', 'Docker', 'PostgreSQL'] },
+    { group: 'AI', items: ['Generative AI', 'RAG', 'Agentic AI', 'LLM Engineering', 'Python'] },
   ],
 
   education: [
@@ -143,7 +154,7 @@ export const CONTENT = {
   },
 
   theme: {
-    accent: '#6aa5ff',
-    accent2: '#a78bfa',
+    accent: '#ff2d2d',
+    accent2: '#ff6a1f',
   },
 };

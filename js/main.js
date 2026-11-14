@@ -1,38 +1,33 @@
 import { CONTENT } from '../content.js';
 import { buildUI } from './ui.js';
+import { initFx } from './fx.js';
 
-const loader = document.getElementById('loader');
 const fill = document.getElementById('loader-fill');
-const pct = document.getElementById('loader-pct');
+const setProgress = (p) => { fill.style.width = Math.round(Math.min(1, Math.max(0, p)) * 100) + '%'; };
+const wait = (ms) => new Promise((r) => setTimeout(r, ms));
+const started = performance.now();
 
-const setProgress = (p) => {
-  const v = Math.round(Math.min(1, Math.max(0, p)) * 100);
-  fill.style.width = v + '%';
-  pct.textContent = v + '%';
-};
-const finish = () => {
-  setProgress(1);
-  setTimeout(() => loader.classList.add('done'), 350);
-};
-
-const ui = buildUI(CONTENT);
-setProgress(0.15);
+buildUI(CONTENT);
+initFx();
+setProgress(0.2);
 
 // The page stays fully usable if 3D cannot start (no WebGL, blocked CDN).
 try {
   const { initScene } = await import('./scene.js');
-  setProgress(0.4);
+  setProgress(0.5);
   await initScene({
     canvas: document.getElementById('scene'),
-    sections: ui.sections,
-    theme: CONTENT.theme,
-    experienceCount: CONTENT.experience.length,
-    projects: CONTENT.featured,
-    onProgress: (p) => setProgress(0.4 + p * 0.6),
+    onProgress: (p) => setProgress(0.5 + p * 0.5),
   });
 } catch (err) {
-  console.warn('3D scene unavailable, showing the page without it:', err);
+  console.warn('3D layer unavailable, showing the page without it:', err);
   document.getElementById('scene').remove();
-  document.body.classList.add('no-webgl');
 }
-finish();
+
+// Hold long enough for the name to finish appearing, then open the page:
+// the name slides in first and the photo follows (timed in style.css).
+setProgress(1);
+await Promise.race([document.fonts.ready, wait(1500)]);
+await wait(Math.max(0, 1500 - (performance.now() - started)));
+document.body.classList.remove('loading');
+document.body.classList.add('ready');
