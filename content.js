@@ -3,10 +3,13 @@
 
 export const CONTENT = {
   name: 'Sai Pradeep Reddy',
-  // The word shown in large light-grey letters behind the video on the first screen.
+  // The word shown in large faint letters behind the video on the first screen.
   giantName: 'Pradeep',
   role: 'Full Stack Developer',
   tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems. From payment microservices to clinical AI summaries, I like turning hard problems into software people rely on.',
+  // First-screen headline lines and the short line under them.
+  headline: ['Full Stack', 'Developer'],
+  heroLine: 'Enterprise software · AI engineering',
   location: 'United States',
 
   photos: {
@@ -19,9 +22,9 @@ export const CONTENT = {
   },
 
   // The talking intro video shown in the About section.
-  intro: { file: 'assets/intro.mp4' },
+  intro: { file: 'assets/about.mp4' },
 
-  // Words between *stars* are shown in black; the rest is grey.
+  // Words between *stars* are highlighted.
   statement: 'Full stack developer who loves *shipping*. I turn messy enterprise problems into *products* people actually use: clean APIs, fast microservices and *AI features* that hold up in production.',
   about: 'Five-plus years across healthcare and financial services, most recently at Quest Diagnostics and Goldman Sachs. Master’s in Computer Science from the University of Missouri-Kansas City, and a Claude Certified Architect.',
 

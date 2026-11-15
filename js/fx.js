@@ -65,7 +65,7 @@ function heroLive(c) {
       let i = y * w * 8, j = y * w * 4;
       for (let x = 0; x < w; x++, i += 4, j += 4) {
         dst[j] = src[i]; dst[j + 1] = src[i + 1]; dst[j + 2] = src[i + 2];
-        const m = (src[i + w * 4] - 48) * 1.45; // tighten the matte's soft edge
+        const m = (src[i + w * 4] - 120) * 2.4; // pull the matte in so no light edge shows on the dark page
         dst[j + 3] = m < 0 ? 0 : m > 255 ? 255 : m;
       }
     }
@@ -74,22 +74,44 @@ function heroLive(c) {
   };
   const tick = () => { draw(); if (!v.paused && !v.ended) next(); };
   const next = () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(tick) : requestAnimationFrame(tick));
+  const snd = document.getElementById('hero-sound');
+  const pauseBtn = document.getElementById('hero-pause');
+  let held = false, timer = 0; // held: paused by the visitor
+  const setSound = (on) => {
+    v.muted = !on;
+    snd.classList.toggle('on', on);
+    snd.querySelector('span').textContent = on ? 'Sound on' : 'Sound off';
+    snd.setAttribute('aria-label', on ? 'Turn sound off' : 'Turn sound on');
+  };
+  const setHeld = (on) => {
+    held = on;
+    pauseBtn.classList.toggle('paused', on);
+    pauseBtn.setAttribute('aria-label', on ? 'Play video' : 'Pause video');
+  };
   const start = () => {
+    clearTimeout(timer);
     v.currentTime = 0;
-    v.playbackRate = 0.6;
     v.play().then(() => stage.classList.remove('fade')).catch(() => {});
   };
   v.addEventListener('play', next);
   // Hold the last frame, fade, and begin again.
   v.addEventListener('ended', () => {
     draw();
-    setTimeout(() => { stage.classList.add('fade'); setTimeout(start, 600); }, 2200);
+    timer = setTimeout(() => { if (held) return; stage.classList.add('fade'); timer = setTimeout(start, 600); }, 2600);
   });
-  let visible = true;
+  snd.addEventListener('click', () => {
+    const on = v.muted;
+    setSound(on);
+    if (on) { setHeld(false); start(); }
+  });
+  pauseBtn.addEventListener('click', () => {
+    setHeld(!held);
+    if (held) { clearTimeout(timer); v.pause(); } else if (v.ended) start(); else v.play().catch(() => {});
+  });
   new IntersectionObserver(([e]) => {
-    visible = e.isIntersecting;
-    if (!visible) v.pause(); else if (v.paused && !v.ended && v.currentTime > 0) v.play().catch(() => {});
-  }).observe(stage);
+    if (!e.isIntersecting) { v.pause(); setSound(false); }
+    else if (!held && v.paused && !v.ended && v.currentTime > 0) v.play().catch(() => {});
+  }, { threshold: 0.2 }).observe(stage);
   const begin = () => (document.body.classList.contains('ready') ? setTimeout(start, 500) : setTimeout(begin, 120));
   begin();
 }
@@ -228,14 +250,49 @@ function timeline() {
   };
 }
 
+// A soft light follows the pointer, and cards lean toward it.
+function pointerLight() {
+  if (reduceMotion || !matchMedia('(hover: hover) and (pointer: fine)').matches) return;
+  const glow = document.querySelector('.glow');
+  let x = innerWidth / 2, y = innerHeight / 2, tx = x, ty = y, running = false;
+  const step = () => {
+    x += (tx - x) * 0.12; y += (ty - y) * 0.12;
+    glow.style.transform = `translate(${x}px, ${y}px)`;
+    running = Math.abs(tx - x) + Math.abs(ty - y) > 0.3;
+    if (running) requestAnimationFrame(step);
+  };
+  window.addEventListener('pointermove', (e) => {
+    tx = e.clientX; ty = e.clientY;
+    glow.classList.add('on');
+    if (!running) { running = true; requestAnimationFrame(step); }
+  });
+  document.querySelectorAll('.cert, .stat, .video-frame').forEach((card) => {
+    card.addEventListener('pointermove', (e) => {
+      const r = card.getBoundingClientRect();
+      const px = (e.clientX - r.left) / r.width, py = (e.clientY - r.top) / r.height;
+      card.style.setProperty('--mx', `${px * 100}%`);
+      card.style.setProperty('--my', `${py * 100}%`);
+      card.style.transform = `perspective(900px) rotateX(${(0.5 - py) * 7}deg) rotateY(${(px - 0.5) * 9}deg) translateY(-4px)`;
+    });
+    card.addEventListener('pointerleave', () => { card.style.transform = ''; });
+  });
+}
+
 export function initFx(c) {
   reveals();
   navHighlight();
   heroLive(c);
   introVideo();
   orbit();
+  pointerLight();
   const nav = document.querySelector('.nav');
-  const updates = [projectsScroll(), achievementsScroll(), timeline(), () => nav.classList.toggle('scrolled', scrollY > innerHeight * 0.7)];
+  const bar = document.querySelector('.progress');
+  const giant = document.querySelector('.giant');
+  const updates = [projectsScroll(), achievementsScroll(), timeline(), () => {
+    nav.classList.toggle('scrolled', scrollY > innerHeight * 0.7);
+    bar.style.transform = `scaleX(${scrollY / Math.max(1, document.documentElement.scrollHeight - innerHeight)})`;
+    if (scrollY < innerHeight) giant.style.setProperty('--shift', `${scrollY * 0.25}px`);
+  }];
   let queued = false;
   const run = () => { queued = false; updates.forEach((u) => u()); };
   const onScroll = () => { if (!queued) { queued = true; requestAnimationFrame(run); } };

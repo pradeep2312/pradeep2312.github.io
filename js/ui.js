@@ -36,7 +36,11 @@ const img = (src, alt, cls) => {
 // Section heading: a small numbered label and a large title.
 const heading = (n, label, title) => {
   const h = el('header', 'head rv');
-  h.append(el('span', 'kicker', `${pad(n)} / ${label}`), el('h2', 'title', title));
+  const h2 = el('h2', 'title');
+  const words = title.split(' ');
+  const last = words.pop();
+  h2.append(document.createTextNode(words.join(' ') + ' '), el('em', '', last));
+  h.append(el('span', 'kicker', `${pad(n)} — ${label}`), h2);
   return h;
 };
 
@@ -53,18 +57,44 @@ function hero(c) {
   giant.setAttribute('aria-hidden', 'true');
 
   const stage = el('div', 'hero-stage');
-  stage.append(img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo'));
+  stage.append(el('div', 'spot'), img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo'));
   if (c.photos.heroVideo) {
     const cv = el('canvas', 'hero-live');
     cv.setAttribute('aria-hidden', 'true');
     stage.append(cv);
   }
 
-  const who = el('div', 'who');
-  who.append(el('span', 'who-name', c.name), el('h1', 'who-role', c.role));
+  const copy = el('div', 'hero-copy');
+  const h1 = el('h1', 'headline');
+  h1.setAttribute('aria-label', c.headline.join(' '));
+  c.headline.forEach((t, i) => {
+    const line = el('span', 'line');
+    const inner = el('span', '', t);
+    if (i === c.headline.length - 1) inner.append(el('i', 'dot', '.'));
+    line.append(inner);
+    h1.append(line);
+  });
+  copy.append(el('span', 'who-name', c.name), h1, el('p', 'hero-line', c.heroLine));
 
-  const hint = link('#about', 'Scroll ↓', 'scroll-hint');
-  s.append(giant, stage, who, hint);
+  const side = el('div', 'hero-side');
+  side.append(link('#projects', 'Explore work', 'btn solid'), link('#contact', 'Let’s talk', 'btn'));
+
+  s.append(giant, stage, copy, side);
+  if (c.photos.heroVideo) {
+    const ctl = el('div', 'hero-ctl');
+    const snd = el('button', 'ctl');
+    snd.type = 'button';
+    snd.id = 'hero-sound';
+    snd.setAttribute('aria-label', 'Turn sound on');
+    snd.append(el('i', 'ico-sound'), el('span', '', 'Sound off'));
+    const pause = el('button', 'ctl round');
+    pause.type = 'button';
+    pause.id = 'hero-pause';
+    pause.setAttribute('aria-label', 'Pause video');
+    pause.append(el('i', 'ico-pause'));
+    ctl.append(snd, pause);
+    s.append(ctl);
+  }
   return s;
 }
 
@@ -177,7 +207,7 @@ function achievements(c) {
 }
 
 function contact(c) {
-  const s = section('contact');
+  const s = section('contact', 'Contact');
   const links = el('div', 'cta rv');
   if (c.contact.email) links.append(link(`mailto:${c.contact.email}`, 'Email me', 'btn solid'));
   if (c.contact.linkedin) links.append(link(c.contact.linkedin, 'LinkedIn ↗', c.contact.email ? 'btn' : 'btn solid'));
@@ -191,6 +221,7 @@ function contact(c) {
 export function buildUI(c) {
   document.title = `${c.name} — ${c.role}`;
   document.querySelector('meta[name="description"]').content = c.tagline;
+  document.getElementById('brand').textContent = c.name;
   const app = document.getElementById('app');
   const sections = [hero(c), about(c), skills(c), experience(c), projects(c), achievements(c), contact(c)];
   app.append(...sections);
