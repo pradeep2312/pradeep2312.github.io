@@ -1,4 +1,4 @@
-// Builds the page content from content.js. Motion and gestures live in fx.js.
+// Builds the page from content.js. Motion lives in fx.js.
 
 const el = (tag, cls, text) => {
   const n = document.createElement(tag);
@@ -25,24 +25,22 @@ const section = (id, label) => {
 };
 
 const pad = (n) => String(n).padStart(2, '0');
-const img = (src, alt, cls, lazy = true) => {
+const img = (src, alt, cls) => {
   const i = el('img', cls);
   i.src = src;
   i.alt = alt;
   i.draggable = false;
-  if (lazy) i.loading = 'lazy';
   return i;
 };
-const kicker = (n, text) => el('div', 'kicker rv', `(${pad(n)}) — ${text}`);
 
-// A two-line display headline; the last line is red.
-const display = (lines, cls = '') => {
-  const h = el('h2', `display rv ${cls}`.trim());
-  lines.forEach((t, i) => h.append(el('span', i === lines.length - 1 ? 'red' : '', t)));
+// Section heading: a small numbered label and a large title.
+const heading = (n, label, title) => {
+  const h = el('header', 'head rv');
+  h.append(el('span', 'kicker', `${pad(n)} / ${label}`), el('h2', 'title', title));
   return h;
 };
 
-// Turns "plain *red* plain" into text with red spans.
+// Turns "grey *black* grey" into text with emphasised spans.
 const marked = (text, cls) => {
   const p = el('p', cls);
   text.split('*').forEach((part, i) => p.append(i % 2 ? el('mark', '', part) : document.createTextNode(part)));
@@ -51,304 +49,154 @@ const marked = (text, cls) => {
 
 function hero(c) {
   const s = section('hero');
-  const copy = el('div', 'hero-copy');
-  const hello = el('p', 'hello');
-  hello.append(document.createTextNode('Hi, I’m '), el('b', '', c.name), document.createTextNode(' —'));
-  const h1 = el('h1', 'headline');
-  h1.setAttribute('aria-label', c.headline.join(' '));
-  c.headline.forEach((t, i) => {
-    const line = el('span', 'line');
-    line.append(el('span', i === c.headline.length - 1 ? 'red' : '', t));
-    h1.append(line);
-  });
-  const cta = el('div', 'cta');
-  cta.append(link('#work', 'See my work ↘', 'btn solid'));
-  // A round live preview of the talking intro; it opens the full video with sound.
-  const play = el('button', 'intro-pill');
-  play.type = 'button';
-  play.id = 'play-intro';
-  const bubble = el('span', 'bubble');
-  if (c.intro?.file) {
-    const pv = el('video');
-    pv.src = c.intro.file;
-    pv.muted = true;
-    pv.loop = true;
-    pv.autoplay = true;
-    pv.playsInline = true;
-    pv.setAttribute('aria-hidden', 'true');
-    bubble.append(pv);
-  }
-  const label = el('span', 'pill-text');
-  label.append(el('b', '', 'Watch my intro'), el('small', '', '20 sec · with sound'));
-  play.append(bubble, label, el('i', '', '▶'));
-  cta.append(play);
-  copy.append(hello, h1, el('p', 'lede', c.tagline), cta);
-
-  const art = el('div', 'hero-art');
-  const giant = el('div', 'giant');
+  const giant = el('div', 'giant', c.giantName);
   giant.setAttribute('aria-hidden', 'true');
-  [...c.giantName].forEach((ch, i) => {
-    const sp = el('span', '', ch);
-    sp.style.transitionDelay = `${0.1 + i * 0.05}s`;
-    giant.append(sp);
-  });
+
   const stage = el('div', 'hero-stage');
-  stage.append(img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo', false));
+  stage.append(img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo'));
   if (c.photos.heroVideo) {
     const cv = el('canvas', 'hero-live');
     cv.setAttribute('aria-hidden', 'true');
-    const hear = el('button', 'hear', 'Hear me say hi');
-    hear.type = 'button';
-    hear.id = 'hear';
     stage.append(cv);
-    art.append(giant, stage, hear);
-  } else art.append(giant, stage);
-  s.append(copy, art);
+  }
+
+  const who = el('div', 'who');
+  who.append(el('span', 'who-name', c.name), el('h1', 'who-role', c.role));
+
+  const hint = link('#about', 'Scroll ↓', 'scroll-hint');
+  s.append(giant, stage, who, hint);
   return s;
-}
-
-function idCard(c) {
-  const card = el('div', 'idcard');
-  card.tabIndex = 0;
-  card.setAttribute('role', 'button');
-  card.setAttribute('aria-label', 'ID card. Press Enter to flip it.');
-  const inner = el('div', 'idcard-in');
-
-  const front = el('div', 'face front');
-  const photo = el('div', 'id-photo');
-  photo.append(img(c.photos.journey, '', ''));
-  front.append(el('div', 'id-top', 'Portfolio pass'), photo, el('b', '', c.name), el('span', '', c.role), el('em', '', 'Flip ↻'));
-
-  const back = el('div', 'face back');
-  const now = c.experience[0];
-  [['Based in', c.location], ['Currently', now ? `${now.role}, ${now.company.split(' · ')[0]}` : c.role], ['Certified', c.certifications[0]?.title || ''], ['Focus', 'Microservices, React, GenAI']].forEach(([k, v]) => {
-    const row = el('div', 'id-row');
-    row.append(el('span', '', k), el('b', '', v));
-    back.append(row);
-  });
-  back.append(el('div', 'barcode'), el('em', '', 'Flip ↻'));
-
-  inner.append(front, back);
-  card.append(el('div', 'strap'), inner);
-  return card;
 }
 
 function about(c) {
   const s = section('about', 'About');
-  const left = el('div', 'about-photo rv');
-  left.append(el('div', 'blob'), img(c.photos.about, `${c.name}, seated`, ''), idCard(c));
-  const right = el('div', 'about-copy');
-  const tiles = el('div', 'tiles rv');
-  [c.stats[0], c.stats[1], c.stats[3]].forEach((st) => {
-    const t = el('div', 'tile');
-    const m = st.value.match(/^([\d.]+)(.*)$/);
-    const b = el('b');
-    if (m) b.append(document.createTextNode(m[1]), el('i', '', m[2]));
-    else b.textContent = st.value;
-    t.append(b, el('span', '', st.label));
-    tiles.append(t);
+  const media = el('div', 'about-media rv');
+  if (c.intro?.file) {
+    const frame = el('div', 'video-frame');
+    const v = el('video');
+    v.src = c.intro.file;
+    v.muted = true;
+    v.loop = true;
+    v.autoplay = true;
+    v.playsInline = true;
+    v.preload = 'metadata';
+    const btn = el('button', 'sound');
+    btn.type = 'button';
+    btn.id = 'intro-sound';
+    btn.append(el('i'), el('span', '', 'Play with sound'));
+    frame.append(v, btn);
+    media.append(frame);
+  } else media.append(img(c.photos.about, '', 'about-still'));
+
+  const body = el('div', 'about-body');
+  body.append(heading(1, 'About', 'About me'), marked(c.statement, 'statement rv'), el('p', 'sub rv', c.about));
+  const stats = el('div', 'stats rv');
+  c.stats.forEach((st) => {
+    const t = el('div', 'stat');
+    t.append(el('b', '', st.value), el('span', '', st.label));
+    stats.append(t);
   });
-  right.append(kicker(1, 'About me'), marked(c.statement, 'statement rv'), el('p', 'sub rv', c.about), tiles);
-  s.append(left, right);
+  body.append(stats);
+  s.append(media, body);
   return s;
 }
 
-function work(c) {
-  const s = section('work', 'Work');
-  const pin = el('div', 'work-pin');
-  const left = el('div', 'work-left');
-  const count = el('div', 'work-count');
-  count.append(el('b', '', '01'), el('span', '', `/ ${pad(c.featured.length)}`), el('i'));
-  const items = el('div', 'work-items');
-  c.featured.forEach((p) => {
-    const it = el('article', 'work-item');
-    it.append(el('div', 'tag', p.tag), el('h3', '', p.name), el('p', '', p.summary));
-    const tech = el('div', 'tech');
-    p.tech.forEach((t) => tech.append(el('span', '', t)));
-    it.append(tech);
-    if (p.code) it.append(link(p.code, 'View on GitHub ↗', 'ghlink'));
-    if (p.live) it.append(link(p.live, 'Live demo ↗', 'ghlink'));
-    items.append(it);
-  });
-  left.append(el('div', 'kicker', '(02) — Selected work'), count, items);
-
-  const stack = el('div', 'wstack');
-  c.featured.forEach((p) => {
-    const card = el('div', 'wcard');
-    card.append(el('b', '', p.card.figure), el('span', '', p.card.label));
-    const rows = el('ul');
-    p.card.rows.forEach((r) => rows.append(el('li', '', r)));
-    card.append(rows);
-    stack.append(card);
-  });
-
-  const photo = el('div', 'work-photo');
-  photo.append(img(c.photos.work, `${c.name} working on a laptop`, ''));
-  pin.append(left, stack, photo);
-  s.append(pin);
+function skills(c) {
+  const s = section('skills', 'Skills');
+  const names = c.skillGroups.flatMap((g) => g.items.map((it) => it[1]));
+  const orbit = el('div', 'orbit rv');
+  orbit.append(el('div', 'ring r1'), el('div', 'ring r2'), img(c.photos.journey, '', 'orbit-photo'));
+  names.forEach((n, i) => orbit.append(el('span', `chip${i % 3 === 1 ? ' light' : ''}`, n)));
+  s.append(heading(2, 'Skills', 'What I work with'), orbit);
   return s;
 }
 
-function journey(c) {
-  const s = section('journey', 'Journey');
-  const left = el('div', 'journey-photo rv');
-  const firstYear = (c.experience[c.experience.length - 1]?.period.match(/\d{4}/) || [''])[0];
-  const year = el('div', 'year', firstYear);
-  year.setAttribute('aria-hidden', 'true');
-  left.append(year, img(c.photos.journey, `${c.name}, smiling`, ''));
-  const right = el('div', 'journey-copy');
+function experience(c) {
+  const s = section('experience', 'Experience');
   const line = el('div', 'timeline');
   line.append(el('div', 'timeline-fill'));
-  c.experience.forEach((x) => {
-    const item = el('div', 'tl rv');
-    item.append(el('span', 'period', x.period), el('h3', '', x.role), el('p', 'company', x.company));
-    if (x.points?.length) {
-      const d = el('details');
-      d.append(el('summary', '', 'What I did'));
+  c.experience.forEach((job) => {
+    const row = el('article', 'tl rv');
+    row.append(el('span', 'period', job.period), el('h3', '', job.role), el('p', 'company', job.company));
+    if (job.points?.length) {
       const ul = el('ul');
-      x.points.forEach((p) => ul.append(el('li', '', p)));
-      d.append(ul);
-      item.append(d);
+      job.points.forEach((pt) => ul.append(el('li', '', pt)));
+      row.append(ul);
     }
-    line.append(item);
+    line.append(row);
   });
-  c.education.forEach((e) => {
-    const item = el('div', 'tl rv');
-    item.append(el('span', 'period', 'Education'), el('h3', '', e.title), el('p', 'company', e.place));
-    line.append(item);
-  });
-  right.append(kicker(3, 'The journey so far'), display(c.journeyHeadline), line);
-  s.append(left, right);
+  s.append(heading(3, 'Experience', 'Where I’ve worked'), line);
   return s;
 }
 
-function toolkit(c) {
-  const s = section('toolkit', 'Toolkit');
-  const top = el('div', 'tk-top');
-  const headBox = el('div', 'tk-head');
-  headBox.append(kicker(4, 'Toolkit'), display(['Everything', 'in orbit.']));
-  const orbit = el('div', 'orbit');
-  orbit.append(el('div', 'pulse'), el('div', 'pulse p2'), img(c.photos.hero, '', 'orbit-photo'));
-  const names = c.skillGroups.flatMap((g) => g.items.map(([, name]) => name));
-  names.filter((_, i) => i % 2 === 0).slice(0, 10).forEach((n) => orbit.append(el('span', 'chip', n)));
-  top.append(headBox, orbit);
+function projects(c) {
+  const s = section('projects', 'Projects');
+  const pin = el('div', 'pj-pin');
+  const head = heading(4, 'Projects', 'Things I’ve built');
+  const count = el('div', 'pj-count');
+  count.append(el('b', '', '01'), el('span', '', `/ ${pad(c.featured.length)}`));
+  head.append(count);
 
-  const tableHead = el('div', 'table-head rv');
-  tableHead.append(el('h3', '', 'The periodic table of what I use'));
-  const legend = el('div', 'legend');
-  c.skillGroups.forEach((g, gi) => {
-    const l = el('span', `g${gi}`);
-    l.append(el('i'), document.createTextNode(g.group));
-    legend.append(l);
+  const scene = el('div', 'pj-scene');
+  const ring = el('div', 'pj-ring');
+  c.featured.forEach((p, i) => {
+    const card = el('article', `pcard${i % 2 ? ' light' : ''}`);
+    const top = el('div', 'pcard-top');
+    top.append(el('span', '', pad(i + 1)), el('span', '', p.tag));
+    const fig = el('div', 'pcard-fig');
+    fig.append(el('b', '', p.card.figure), el('span', '', p.card.label));
+    const foot = el('div', 'pcard-foot');
+    foot.append(el('span', '', p.tech.slice(0, 3).join(' · ')), link(p.live || p.code, p.live ? 'Open ↗' : 'Code ↗'));
+    card.append(top, fig, el('h3', '', p.name), el('p', '', p.summary), foot);
+    ring.append(card);
   });
-  tableHead.append(legend);
-  const table = el('div', 'ptable');
-  let n = 0;
-  c.skillGroups.forEach((g, gi) => g.items.forEach(([sym, name]) => {
-    n += 1;
-    const cell = el('div', `elem g${gi} rv`);
-    cell.style.transitionDelay = `${(n % 8) * 0.04}s`;
-    cell.append(el('small', '', pad(n)), el('b', '', sym), el('span', '', name));
-    cell.title = `${name} — ${g.group}`;
-    table.append(cell);
-  }));
-
-  const ticker = el('div', 'ticker');
-  ticker.setAttribute('aria-hidden', 'true');
-  const run = el('div', 'ticker-run');
-  for (let k = 0; k < 2; k++) names.forEach((t) => run.append(el('span', '', t), el('i', '', '✦')));
-  ticker.append(run);
-
-  s.append(top, tableHead, table, ticker);
-  return s;
-}
-
-function awards(c) {
-  const s = section('awards', 'Awards');
-  const pin = el('div', 'aw-pin');
-  const head = el('div', 'aw-head');
-  const tiles = el('div', 'aw-tiles');
-  [...c.stats.slice(0, 3), { value: String(c.certifications.length), label: 'Certifications' }].forEach((st) => {
-    const t = el('div', 'aw-tile');
-    t.append(el('b', '', st.value), el('span', '', st.label));
-    tiles.append(t);
-  });
-  head.append(el('div', 'kicker', '(05) — Proof of work'), tiles);
-  const track = el('div', 'aw-track');
-  c.certifications.forEach((x, i) => {
-    const card = el('div', 'cert');
-    card.append(el('small', '', `Certification ${pad(i + 1)}`), el('b', '', x.title), el('span', '', x.place), el('i', '', '✓'));
-    track.append(card);
-  });
-  pin.append(head, track, el('div', 'aw-hint', 'Keep scrolling →'));
+  scene.append(ring);
+  pin.append(head, scene);
   s.append(pin);
   return s;
 }
 
-function repoRow(r, notes = {}) {
-  const row = link(r.html_url, '', 'repo');
-  row.append(el('b', '', r.name), el('span', '', r.description || notes[r.name] || ''), el('em', '', r.language || ''), el('i', '', '↗'));
-  return row;
-}
-
-async function loadRepos(sectionEl, list, username, skip, notes) {
-  try {
-    const res = await fetch(`https://api.github.com/users/${encodeURIComponent(username)}/repos?per_page=100&sort=pushed`);
-    if (!res.ok) throw new Error(`GitHub responded ${res.status}`);
-    const repos = (await res.json())
-      .filter((r) => !r.fork && !r.archived && r.size > 0 && !skip.has(r.name.toLowerCase()) && !r.name.toLowerCase().endsWith('.github.io'))
-      .sort((a, b) => b.stargazers_count - a.stargazers_count || new Date(b.pushed_at) - new Date(a.pushed_at))
-      .slice(0, 6);
-    if (!repos.length) throw new Error('no repositories to show');
-    list.replaceChildren(...repos.map((r) => repoRow(r, notes)));
-    sectionEl.hidden = false;
-  } catch (err) {
-    console.warn('Could not load GitHub projects:', err);
-  }
-}
-
-function more(c) {
-  const s = section('more');
-  s.hidden = true; // shown once the list has loaded
-  const list = el('div', 'repos');
-  s.append(el('div', 'kicker', '(06) — More on GitHub'), list);
-  if (c.githubUsername) loadRepos(s, list, c.githubUsername, new Set(c.featured.map((p) => (p.repo || p.name).toLowerCase())), c.repoNotes || {});
+function achievements(c) {
+  const s = section('achievements', 'Achievements');
+  const pin = el('div', 'aw-pin');
+  const head = heading(5, 'Achievements', 'Certifications and education');
+  const track = el('div', 'aw-track');
+  c.certifications.forEach((ct, i) => {
+    const card = el('article', `cert${i === 0 ? ' dark' : ''}`);
+    card.append(el('span', 'cert-n', pad(i + 1)), el('h3', '', ct.title), el('p', '', ct.place));
+    track.append(card);
+  });
+  c.education.forEach((ed) => {
+    const card = el('article', 'cert edu');
+    card.append(el('span', 'cert-n', 'Education'), el('h3', '', ed.title), el('p', '', ed.place));
+    track.append(card);
+  });
+  pin.append(head, track);
+  s.append(pin);
   return s;
 }
 
 function contact(c) {
-  const s = section('contact', 'Contact');
-  const k = c.contact;
+  const s = section('contact');
   const links = el('div', 'cta rv');
-  if (k.email) links.append(link('mailto:' + k.email, 'Email me', 'btn solid'));
-  if (k.linkedin) links.append(link(k.linkedin, 'LinkedIn ↗', `btn${k.email ? '' : ' solid'}`));
-  if (k.github) links.append(link(k.github, 'GitHub ↗', 'btn'));
-  if (k.resume) links.append(link(k.resume, 'Download résumé', 'btn'));
-  s.append(kicker(7, 'Contact'), display(k.heading, 'huge'), el('p', 'note rv', k.note), links, el('div', 'foot', `© ${new Date().getFullYear()} ${c.name}`));
+  if (c.contact.email) links.append(link(`mailto:${c.contact.email}`, 'Email me', 'btn solid'));
+  if (c.contact.linkedin) links.append(link(c.contact.linkedin, 'LinkedIn ↗', c.contact.email ? 'btn' : 'btn solid'));
+  if (c.contact.github) links.append(link(c.contact.github, 'GitHub ↗', 'btn'));
+  if (c.contact.resume) links.append(link(c.contact.resume, 'Résumé ↓', 'btn'));
+  s.append(el('h2', 'title big rv', c.contact.heading.join(' ')), el('p', 'sub rv', c.contact.note), links,
+    el('p', 'foot', `© ${new Date().getFullYear()} ${c.name}`));
   return s;
 }
 
 export function buildUI(c) {
   document.title = `${c.name} — ${c.role}`;
   document.querySelector('meta[name="description"]').content = c.tagline;
-
-  const brand = document.getElementById('brand');
-  brand.append(document.createTextNode(c.giantName), el('i'));
-
-  // Loader: the name rises in letter by letter.
-  const loaderName = document.getElementById('loader-name');
-  [...c.name].forEach((ch, i) => {
-    const span = el('span', '', ch);
-    span.style.animationDelay = `${i * 0.035}s`;
-    loaderName.append(span);
-  });
-
-  const sections = [hero(c), about(c), work(c), journey(c), toolkit(c), awards(c), more(c), contact(c)];
-  document.getElementById('app').append(...sections);
-
+  const app = document.getElementById('app');
+  const sections = [hero(c), about(c), skills(c), experience(c), projects(c), achievements(c), contact(c)];
+  app.append(...sections);
   const nav = document.getElementById('nav-links');
   sections.filter((s) => s.dataset.label).forEach((s) => {
-    const a = link('#' + s.id, s.dataset.label);
+    const a = link(`#${s.id}`, s.dataset.label);
     a.dataset.for = s.id;
     nav.append(a);
   });

@@ -3,16 +3,14 @@
 
 export const CONTENT = {
   name: 'Sai Pradeep Reddy',
-  // The word shown in giant red letters behind the photo on the first screen.
+  // The word shown in large light-grey letters behind the video on the first screen.
   giantName: 'Pradeep',
   role: 'Full Stack Developer',
-  // First-screen headline; the last line is shown in red.
-  headline: ['Full-stack', 'Developer.'],
   tagline: 'I build enterprise applications with Spring Boot and React, and AI features with RAG and agentic systems. From payment microservices to clinical AI summaries, I like turning hard problems into software people rely on.',
   location: 'United States',
 
   photos: {
-    // The moving cut-out in the first screen (picture on the left half, matte on the right).
+    // The slow-motion cut-out in the first screen (picture on the left half, matte on the right).
     heroVideo: 'assets/walk.mp4',
     hero: 'assets/stand.png',
     about: 'assets/seated.png',
@@ -20,14 +18,10 @@ export const CONTENT = {
     journey: 'assets/smile.png',
   },
 
-  // The intro video. "file" is a video file in this folder (for example
-  // 'assets/intro.mp4'); when it is empty, the HeyGen player opens instead.
-  intro: {
-    file: 'assets/intro.mp4',
-    embed: 'https://app.heygen.com/embeds/d5e0396f41864d9b81f1b7ef2c119aa1',
-  },
+  // The talking intro video shown in the About section.
+  intro: { file: 'assets/intro.mp4' },
 
-  // Words between *stars* are shown in red.
+  // Words between *stars* are shown in black; the rest is grey.
   statement: 'Full stack developer who loves *shipping*. I turn messy enterprise problems into *products* people actually use: clean APIs, fast microservices and *AI features* that hold up in production.',
   about: 'Five-plus years across healthcare and financial services, most recently at Quest Diagnostics and Goldman Sachs. Master’s in Computer Science from the University of Missouri-Kansas City, and a Claude Certified Architect.',
 
@@ -38,7 +32,7 @@ export const CONTENT = {
     { value: '40%', label: 'Faster chart review' },
   ],
 
-  // The "periodic table" of skills. Each item is [symbol, name].
+  // The skills that revolve around the photo. Each item is [short form, name].
   skillGroups: [
     { group: 'Backend', items: [['Jv', 'Java'], ['Sb', 'Spring Boot'], ['Ms', 'Microservices'], ['Kf', 'Apache Kafka'], ['Gr', 'gRPC'], ['Gq', 'GraphQL'], ['Rs', 'REST APIs']] },
     { group: 'Frontend', items: [['Re', 'React'], ['Ng', 'Angular'], ['Ts', 'TypeScript']] },
@@ -60,7 +54,6 @@ export const CONTENT = {
     { title: 'AI Engineer Core Track: LLM Engineering, RAG, QLoRA, Agents', place: 'Udemy' },
   ],
 
-  journeyHeadline: ['Building', 'at scale.'],
   experience: [
     {
       role: 'Full Stack Java Developer',
@@ -87,8 +80,7 @@ export const CONTENT = {
     { role: 'Software Engineer', company: 'CMS IT Services · Hyderabad, India', period: 'Jan 2021 — Nov 2022', points: [] },
   ],
 
-  // The projects in the "Work" section. Each one has a small red card:
-  // a big figure, a label under it, and up to four short rows.
+  // The revolving project cards: a big figure, a label under it, and short rows.
   featured: [
     {
       name: 'AI News Agent',
