@@ -64,9 +64,13 @@ function heroLive(c) {
     for (let y = 0; y < h; y++) {
       let i = y * w * 8, j = y * w * 4;
       for (let x = 0; x < w; x++, i += 4, j += 4) {
-        dst[j] = src[i]; dst[j + 1] = src[i + 1]; dst[j + 2] = src[i + 2];
-        const m = (src[i + w * 4] - 120) * 2.4; // pull the matte in so no light edge shows on the dark page
-        dst[j + 3] = m < 0 ? 0 : m > 255 ? 255 : m;
+        // The outline is where the studio backdrop mixes into the picture, so
+        // it is darkened as it fades out: no light fringe shows on the dark page.
+        let m = (src[i + w * 4] - 70) * 1.5;
+        m = m < 0 ? 0 : m > 255 ? 255 : m;
+        const k = m >= 250 ? 1 : (m / 255) * (m / 255);
+        dst[j] = src[i] * k; dst[j + 1] = src[i + 1] * k; dst[j + 2] = src[i + 2] * k;
+        dst[j + 3] = m;
       }
     }
     ctx.putImageData(out, 0, 0);

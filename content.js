@@ -83,7 +83,8 @@ export const CONTENT = {
     { role: 'Software Engineer', company: 'CMS IT Services · Hyderabad, India', period: 'Jan 2021 — Nov 2022', points: [] },
   ],
 
-  // The revolving project cards: a big figure, a label under it, and short rows.
+  // The revolving project cards: the five most recently updated GitHub projects.
+  // Each has a big figure and a label under it.
   featured: [
     {
       name: 'AI News Agent',
@@ -91,7 +92,7 @@ export const CONTENT = {
       tag: 'AI automation',
       summary: 'A personal news service that collects RSS articles, removes duplicates, ranks them and sends an AI-written daily digest to Telegram.',
       tech: ['Java 21', 'Spring Boot', 'PostgreSQL', 'OpenAI API', 'Docker'],
-      card: { figure: '1–10', label: 'Importance score', rows: ['RSS feeds collected', 'Duplicates removed', 'Articles ranked', 'Digest sent to Telegram'] },
+      card: { figure: '1–10', label: 'Importance score' },
       code: 'https://github.com/pradeep2312/ai-news-agent',
       live: '',
     },
@@ -101,18 +102,28 @@ export const CONTENT = {
       tag: 'RAG',
       summary: 'A retrieval-augmented assistant that parses company PDFs, stores embeddings in pgvector, reranks matches and answers questions in a React interface.',
       tech: ['Python', 'FastAPI', 'pgvector', 'React', 'TypeScript'],
-      card: { figure: 'RAG', label: 'Retrieval pipeline', rows: ['PDFs parsed and chunked', 'Embeddings in pgvector', 'Matches reranked', 'Answers in a React UI'] },
+      card: { figure: 'RAG', label: 'Retrieval pipeline' },
       code: 'https://github.com/pradeep2312/AI_Enterprise_Knowledge_Assistant',
       live: '',
     },
     {
-      name: 'Fake News Detection',
-      repo: 'Fake-News-Detection',
-      tag: 'Machine learning',
-      summary: 'An LSTM model that classifies news articles as real or fake, served through a Streamlit web app.',
-      tech: ['Python', 'LSTM', 'NLP', 'Streamlit'],
-      card: { figure: '94%', label: 'Accuracy', rows: ['Embedding layer', 'LSTM layer', 'Dense layer', 'Streamlit app'] },
-      code: 'https://github.com/pradeep2312/Fake-News-Detection',
+      name: 'JavaScript Project',
+      repo: 'JavaScript_Project',
+      tag: 'Web',
+      summary: 'JavaScript practice exercises.',
+      tech: ['JavaScript', 'HTML'],
+      card: { figure: 'JS', label: 'Practice work' },
+      code: 'https://github.com/pradeep2312/JavaScript_Project',
+      live: '',
+    },
+    {
+      name: 'Stock Analysis',
+      repo: 'stock-analysis-project',
+      tag: 'Data',
+      summary: 'Stock market analysis with PySpark and SQL.',
+      tech: ['PySpark', 'SQL', 'Jupyter'],
+      card: { figure: 'SQL', label: 'PySpark analysis' },
+      code: 'https://github.com/pradeep2312/stock-analysis-project',
       live: '',
     },
     {
@@ -121,7 +132,7 @@ export const CONTENT = {
       tag: 'IoT',
       summary: 'An ESP32 station that measures weather and air-particle levels, publishes readings over MQTT to Google Cloud and shows them on a live dashboard.',
       tech: ['ESP32', 'C++', 'MQTT', 'React', 'GCP'],
-      card: { figure: 'MQTT', label: 'Live telemetry', rows: ['ESP32 sensors', 'Temperature and humidity', 'Google Cloud broker', 'React dashboard'] },
+      card: { figure: 'MQTT', label: 'Live telemetry' },
       code: 'https://github.com/pradeep2312/Weather-Station-IOT-',
       live: '',
     },
