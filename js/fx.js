@@ -34,18 +34,9 @@ const progress = (sec) => {
   return clamp(-r.top / Math.max(1, r.height - innerHeight), 0, 1);
 };
 
-// First screen: the walk-in clip plays in slow motion as a cut-out, so only
-// the person is drawn and the page shows around them. It repeats quietly.
-function heroLive(c) {
-  const cv = document.querySelector('.hero-live');
-  if (!cv) return;
-  if (reduceMotion) { cv.remove(); return; }
-  const stage = cv.parentElement;
-  const v = document.createElement('video');
-  v.src = c.photos.heroVideo;
-  v.muted = true;
-  v.playsInline = true;
-  v.preload = 'auto';
+// Draws a cut-out video onto a canvas. The file holds the picture in its left
+// half and the matte in its right half. Returns the function that draws a frame.
+function cutout(cv, v, onDraw) {
   const ctx = cv.getContext('2d');
   const buf = document.createElement('canvas');
   const bctx = buf.getContext('2d', { willReadFrequently: true });
@@ -74,8 +65,24 @@ function heroLive(c) {
       }
     }
     ctx.putImageData(out, 0, 0);
-    stage.classList.add('live');
+    onDraw();
   };
+  return draw;
+}
+
+// First screen: the walk-in clip plays in slow motion as a cut-out, so only
+// the person is drawn and the page shows around them. It repeats quietly.
+function heroLive(c) {
+  const cv = document.querySelector('.hero-live');
+  if (!cv) return;
+  if (reduceMotion) { cv.remove(); return; }
+  const stage = cv.parentElement;
+  const v = document.createElement('video');
+  v.src = c.photos.heroVideo;
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = 'auto';
+  const draw = cutout(cv, v, () => stage.classList.add('live'));
   const tick = () => { draw(); if (!v.paused && !v.ended) next(); };
   const next = () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(tick) : requestAnimationFrame(tick));
   const snd = document.getElementById('hero-sound');
@@ -145,24 +152,31 @@ function introVideo() {
   }, { threshold: 0.25 }).observe(v);
 }
 
-// Skills revolve around the photo on two tilted rings, passing behind and in front.
+// Skills revolve around the photo as glowing words on three tilted rings.
+// Each word grows and sharpens as it comes to the front, passes across the
+// figure, then shrinks and dims as it goes round the back.
 function orbit() {
   const box = document.querySelector('.orbit');
-  const chips = [...box.querySelectorAll('.chip')];
-  const n = chips.length;
+  const words = [...box.querySelectorAll('.word')];
+  const rings = [
+    { rx: 0.44, ry: 0.07, cy: -0.2, speed: 0.34 },
+    { rx: 0.5, ry: 0.09, cy: 0.04, speed: -0.26 },
+    { rx: 0.4, ry: 0.07, cy: 0.27, speed: 0.3 },
+  ];
+  const per = rings.map((_, r) => words.filter((__, i) => i % rings.length === r).length);
   const place = (t) => {
     const w = box.clientWidth, h = box.clientHeight;
-    chips.forEach((chip, i) => {
-      const outer = i % 2;
-      const a = (i / n) * Math.PI * 2 + t * (outer ? -0.22 : 0.3);
-      const rx = w * (outer ? 0.46 : 0.31);
-      const ry = h * (outer ? 0.2 : 0.12);
-      const x = Math.cos(a) * rx;
-      const y = Math.sin(a) * ry + h * (outer ? 0.12 : 0.2);
-      const depth = Math.sin(a); // > 0 means in front of the photo
-      chip.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${0.84 + depth * 0.16})`;
-      chip.style.zIndex = depth > 0 ? 3 : 1;
-      chip.style.opacity = 0.45 + (depth + 1) * 0.275;
+    words.forEach((word, i) => {
+      const r = i % rings.length, ring = rings[r];
+      const a = (Math.floor(i / rings.length) / per[r]) * Math.PI * 2 + r * 0.7 + t * ring.speed;
+      const depth = Math.sin(a); // 1 = nearest, -1 = farthest
+      const x = Math.cos(a) * w * ring.rx;
+      const y = h * ring.cy + depth * h * ring.ry;
+      const near = (depth + 1) / 2;
+      word.style.transform = `translate(-50%, -50%) translate(${x}px, ${y}px) scale(${0.55 + near * 0.75})`;
+      word.style.zIndex = depth > 0 ? 3 : 1;
+      word.style.opacity = 0.22 + near * 0.78;
+      word.style.filter = near < 0.45 ? `blur(${(0.45 - near) * 5}px)` : 'none';
     });
   };
   place(0);

@@ -135,8 +135,8 @@ function skills(c) {
   const s = section('skills', 'Skills');
   const names = c.skillGroups.flatMap((g) => g.items.map((it) => it[1]));
   const orbit = el('div', 'orbit rv');
-  orbit.append(el('div', 'ring r1'), el('div', 'ring r2'), img(c.photos.journey, '', 'orbit-photo'));
-  names.forEach((n, i) => orbit.append(el('span', `chip${i % 3 === 1 ? ' light' : ''}`, n)));
+  orbit.append(el('div', 'ring r1'), el('div', 'ring r2'), el('div', 'ring r3'), img(c.photos.journey, '', 'orbit-photo'));
+  names.forEach((n, i) => orbit.append(el('span', `word${i % 4 === 0 ? ' hot' : ''}`, n)));
   s.append(heading(2, 'Skills', 'What I work with'), orbit);
   return s;
 }

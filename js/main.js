@@ -1,6 +1,6 @@
-import { CONTENT } from '../content.js?v=8';
-import { buildUI } from './ui.js?v=8';
-import { initFx } from './fx.js?v=8';
+import { CONTENT } from '../content.js?v=11';
+import { buildUI } from './ui.js?v=11';
+import { initFx } from './fx.js?v=11';
 
 const wait = (ms) => new Promise((r) => setTimeout(r, ms));
 

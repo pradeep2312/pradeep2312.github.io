@@ -116,17 +116,18 @@ body.ready .hero-side, body.ready .hero-ctl { opacity: 1; }
 .stat b { display: block; font: 600 clamp(1.8rem, 2.8vw, 2.6rem) / 1.1 var(--display); letter-spacing: -0.03em; background: linear-gradient(100deg, #f6cdb0, var(--gold)); -webkit-background-clip: text; background-clip: text; color: transparent; }
 .stat span { display: block; margin-top: 6px; font: 500 9.5px / 1.5 var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--dim); }
 
-/* Skills revolve around the photo */
-#skills { text-align: center; }
-.orbit { position: relative; height: clamp(440px, 72vh, 640px); max-width: 1000px; margin: 0 auto; }
-.orbit::before { content: ''; position: absolute; left: 50%; top: 46%; width: 70%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(226, 152, 108, 0.16), transparent 62%); }
-.orbit::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 26%; background: linear-gradient(to top, var(--bg), transparent); z-index: 2; pointer-events: none; }
-.orbit-photo { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; max-width: none; transform: translateX(-50%); z-index: 2; pointer-events: none; }
-.ring { position: absolute; left: 50%; top: 62%; border: 1px solid var(--gold-soft); border-radius: 50%; transform: translate(-50%, -50%); }
-.ring.r1 { width: 62%; height: 24%; top: 70%; }
-.ring.r2 { width: 92%; height: 40%; border-color: var(--line); }
-.chip { position: absolute; left: 50%; top: 50%; padding: 8px 16px; border-radius: 999px; background: rgba(22, 21, 25, 0.86); color: var(--ink); border: 1px solid var(--gold-soft); font-size: 13px; font-weight: 500; white-space: nowrap; will-change: transform; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); box-shadow: 0 14px 26px -16px #000; }
-.chip.light { background: linear-gradient(120deg, #f3c3a2, var(--gold)); color: #1a0f09; border-color: transparent; }
+/* Skills: glowing words revolve around the photo */
+#skills { text-align: center; overflow: hidden; }
+.orbit { position: relative; height: clamp(460px, 76vh, 680px); max-width: 1100px; margin: 0 auto; }
+.orbit::before { content: ''; position: absolute; left: 50%; top: 46%; width: 62%; aspect-ratio: 1; transform: translate(-50%, -50%); border-radius: 50%; background: radial-gradient(circle, rgba(226, 152, 108, 0.2), rgba(226, 152, 108, 0.05) 45%, transparent 66%); }
+.orbit::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 22%; background: linear-gradient(to top, var(--bg), transparent); z-index: 4; pointer-events: none; }
+.orbit-photo { position: absolute; left: 50%; bottom: 0; height: 100%; width: auto; max-width: none; transform: translateX(-50%); z-index: 2; pointer-events: none; filter: drop-shadow(0 0 40px rgba(208, 138, 92, 0.25)); }
+.ring { position: absolute; left: 50%; border: 1px solid rgba(208, 138, 92, 0.22); border-radius: 50%; transform: translate(-50%, -50%); box-shadow: 0 0 24px rgba(208, 138, 92, 0.12), inset 0 0 24px rgba(208, 138, 92, 0.08); }
+.ring.r1 { width: 88%; height: 14%; top: 30%; }
+.ring.r2 { width: 100%; height: 18%; top: 54%; z-index: 1; }
+.ring.r3 { width: 80%; height: 14%; top: 77%; }
+.word { position: absolute; left: 50%; top: 50%; font: 600 clamp(1.05rem, 1.9vw, 1.65rem) / 1 var(--display); letter-spacing: -0.02em; white-space: nowrap; color: #fff4ea; text-shadow: 0 0 6px rgba(255, 214, 184, 0.9), 0 0 18px rgba(226, 152, 108, 0.85), 0 0 42px rgba(208, 138, 92, 0.6); will-change: transform, opacity; }
+.word.hot { color: #ffd2b3; text-shadow: 0 0 8px rgba(255, 190, 150, 1), 0 0 24px rgba(226, 132, 80, 0.95), 0 0 60px rgba(208, 120, 70, 0.75); }
 
 /* Experience */
 .timeline { position: relative; max-width: 820px; padding-left: 34px; }
@@ -204,7 +205,7 @@ body.ready .hero-side, body.ready .hero-ctl { opacity: 1; }
   .video-frame { width: min(78%, 320px); }
   .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .orbit { height: 440px; }
-  .chip { font-size: 11.5px; padding: 6px 12px; }
+  .word { font-size: 0.95rem; }
   .pcard { width: 210px; height: 290px; padding: 16px; border-radius: 18px; }
   .pcard-fig { margin: 12px 0 10px; }
   .pcard-fig b { font-size: 2.3rem; }
