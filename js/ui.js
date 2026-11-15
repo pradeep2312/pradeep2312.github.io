@@ -70,7 +70,7 @@ function hero(c) {
   c.headline.forEach((t, i) => {
     const line = el('span', 'line');
     const inner = el('span', '', t);
-    if (i === c.headline.length - 1) inner.append(el('i', 'dot', '.'));
+    if (i === c.headline.length - 1) { inner.className = 'hot'; inner.append(el('i', 'dot', '.')); }
     line.append(inner);
     h1.append(line);
   });
@@ -79,7 +79,11 @@ function hero(c) {
   const side = el('div', 'hero-side');
   side.append(link('#projects', 'Explore work', 'btn solid'), link('#contact', 'Let’s talk', 'btn'));
 
-  s.append(giant, stage, copy, side);
+  // Stage lighting: a beam from the top corner, smoke behind and in front, a lit floor.
+  const back = el('canvas', 'smoke back');
+  const front = el('canvas', 'smoke front');
+  [back, front].forEach((cv) => cv.setAttribute('aria-hidden', 'true'));
+  s.append(el('div', 'beam'), giant, back, el('div', 'floor'), stage, front, copy, side);
   if (c.photos.heroVideo) {
     const ctl = el('div', 'hero-ctl');
     const snd = el('button', 'ctl');

@@ -83,7 +83,13 @@ function heroLive(c) {
   v.playsInline = true;
   v.preload = 'auto';
   const draw = cutout(cv, v, () => stage.classList.add('live'));
-  const tick = () => { draw(); if (!v.paused && !v.ended) next(); };
+  // The lit floor belongs to the full-length view, so it fades as the camera moves in.
+  const floor = document.querySelector('.floor');
+  const tick = () => {
+    draw();
+    floor.style.opacity = clamp(1 - (v.currentTime - 0.6) / 1.6, 0, 1);
+    if (!v.paused && !v.ended) next();
+  };
   const next = () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(tick) : requestAnimationFrame(tick));
   const snd = document.getElementById('hero-sound');
   const pauseBtn = document.getElementById('hero-pause');
@@ -125,6 +131,74 @@ function heroLive(c) {
   }, { threshold: 0.2 }).observe(stage);
   const begin = () => (document.body.classList.contains('ready') ? setTimeout(start, 500) : setTimeout(begin, 120));
   begin();
+}
+
+// Smoke on the first screen: soft puffs drift slowly across two layers, one
+// behind the figure and a thinner one in front of the legs. Puffs brighten as
+// they pass through the beam of light.
+function smoke() {
+  const hero = document.getElementById('hero');
+  const layers = [...hero.querySelectorAll('.smoke')];
+  if (!layers.length) return;
+  if (reduceMotion) { layers.forEach((l) => l.remove()); return; }
+  const sprite = document.createElement('canvas');
+  sprite.width = sprite.height = 256;
+  const sg = sprite.getContext('2d');
+  const g = sg.createRadialGradient(128, 128, 0, 128, 128, 128);
+  g.addColorStop(0, 'rgba(255,255,255,0.9)');
+  g.addColorStop(0.45, 'rgba(255,255,255,0.32)');
+  g.addColorStop(1, 'rgba(255,255,255,0)');
+  sg.fillStyle = g;
+  sg.fillRect(0, 0, 256, 256);
+  const rnd = (a, b) => a + Math.random() * (b - a);
+  const sets = layers.map((cv) => {
+    const front = cv.classList.contains('front');
+    const puffs = Array.from({ length: front ? 9 : 22 }, () => ({
+      x: rnd(-0.1, 1.1),
+      y: front ? rnd(0.86, 1.04) : (Math.random() < 0.6 ? rnd(0.74, 1.04) : rnd(0.1, 0.7)),
+      r: front ? rnd(0.1, 0.2) : rnd(0.08, 0.22),
+      vx: rnd(0.005, 0.016) * (Math.random() < 0.5 ? -1 : 1),
+      vy: rnd(-0.004, 0.001),
+      a: front ? rnd(0.14, 0.24) : rnd(0.07, 0.17),
+      ph: rnd(0, 6.28),
+    }));
+    return { cv, ctx: cv.getContext('2d'), puffs };
+  });
+  const size = () => sets.forEach(({ cv }) => {
+    cv.width = Math.round(hero.clientWidth / 3);
+    cv.height = Math.round(hero.clientHeight / 3);
+  });
+  size();
+  window.addEventListener('resize', size);
+  // How strongly the beam lights a point: it runs from the top right down to the figure.
+  const lit = (x, y) => {
+    const d = Math.abs((x - 0.9) + y * 0.35) / 1.06; // distance from the beam's centre line
+    return clamp(1 - d / (0.05 + y * 0.16), 0, 1) * clamp(1.2 - y, 0, 1);
+  };
+  let visible = false, raf = 0, last = 0;
+  const loop = (now) => {
+    const dt = Math.min(0.05, (now - last) / 1000 || 0.016);
+    last = now;
+    sets.forEach(({ cv, ctx, puffs }) => {
+      const w = cv.width, h = cv.height;
+      ctx.clearRect(0, 0, w, h);
+      ctx.globalCompositeOperation = 'lighter';
+      puffs.forEach((p) => {
+        p.x += p.vx * dt; p.y += p.vy * dt;
+        if (p.x < -0.3) p.x = 1.3; else if (p.x > 1.3) p.x = -0.3;
+        if (p.y < -0.2) p.y = 1.05;
+        const breathe = 0.75 + 0.25 * Math.sin(now / 2600 + p.ph);
+        const r = p.r * w * (0.9 + 0.1 * Math.sin(now / 4100 + p.ph));
+        ctx.globalAlpha = Math.min(0.7, p.a * breathe * (1 + 2.6 * lit(p.x, p.y)));
+        ctx.drawImage(sprite, p.x * w - r, p.y * h - r, r * 2, r * 2);
+      });
+    });
+    raf = visible ? requestAnimationFrame(loop) : 0;
+  };
+  new IntersectionObserver(([e]) => {
+    visible = e.isIntersecting;
+    if (visible && !raf) { last = performance.now(); raf = requestAnimationFrame(loop); }
+  }).observe(hero);
 }
 
 // About: the talking intro plays silently until asked to play with sound.
@@ -299,6 +373,7 @@ export function initFx(c) {
   reveals();
   navHighlight();
   heroLive(c);
+  smoke();
   introVideo();
   orbit();
   pointerLight();
