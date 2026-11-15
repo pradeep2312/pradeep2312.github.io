@@ -192,6 +192,7 @@ function introVideo(c) {
       f.allowFullscreen = true;
       media.replaceChildren(f);
     }
+    document.querySelector('.bubble video')?.pause();
     modal.hidden = false;
     document.body.classList.add('modal-open');
     modal.querySelector('.modal-close').focus();
@@ -199,6 +200,7 @@ function introVideo(c) {
   const close = () => {
     modal.hidden = true;
     media.replaceChildren();
+    document.querySelector('.bubble video')?.play().catch(() => {});
     document.body.classList.remove('modal-open');
     btn.focus();
   };
@@ -208,11 +210,77 @@ function introVideo(c) {
   window.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) close(); });
 }
 
+// The first screen's photo is alive: a short clip of the walk-in, drawn as a
+// cut-out so the giant name stays visible behind it. It plays once without
+// sound and holds its last frame; the button replays it with sound.
+function heroLive(c) {
+  const cv = document.querySelector('.hero-live');
+  const hear = document.getElementById('hear');
+  if (!cv) return;
+  if (reduceMotion) { cv.remove(); hear.remove(); return; }
+  const stage = cv.parentElement;
+  const v = document.createElement('video');
+  v.src = c.photos.heroVideo;
+  v.muted = true;
+  v.playsInline = true;
+  v.preload = 'auto';
+  const ctx = cv.getContext('2d');
+  const buf = document.createElement('canvas');
+  const bctx = buf.getContext('2d', { willReadFrequently: true });
+  let w = 0, h = 0, out = null;
+  const draw = () => {
+    if (!v.videoWidth) return;
+    if (!w) {
+      w = v.videoWidth / 2; h = v.videoHeight;
+      buf.width = w * 2; buf.height = h;
+      cv.width = w; cv.height = h;
+      out = ctx.createImageData(w, h);
+    }
+    bctx.drawImage(v, 0, 0);
+    const src = bctx.getImageData(0, 0, w * 2, h).data;
+    const dst = out.data;
+    for (let y = 0; y < h; y++) {
+      let i = y * w * 8, j = y * w * 4;
+      for (let x = 0; x < w; x++, i += 4, j += 4) {
+        dst[j] = src[i]; dst[j + 1] = src[i + 1]; dst[j + 2] = src[i + 2];
+        const m = (src[i + w * 4] - 48) * 1.45; // tighten the matte's soft edge
+        dst[j + 3] = m < 0 ? 0 : m > 255 ? 255 : m;
+      }
+    }
+    ctx.putImageData(out, 0, 0);
+    stage.classList.add('live');
+  };
+  const tick = () => {
+    draw();
+    if (!v.paused && !v.ended) next();
+  };
+  const next = () => (v.requestVideoFrameCallback ? v.requestVideoFrameCallback(tick) : requestAnimationFrame(tick));
+  v.addEventListener('play', next);
+  v.addEventListener('seeked', draw);
+  v.addEventListener('ended', () => { draw(); hear.classList.remove('playing'); hear.textContent = 'Hear me say hi'; });
+  const start = (sound) => {
+    v.muted = !sound;
+    v.currentTime = 0;
+    v.play().catch(() => {});
+  };
+  hear.addEventListener('click', () => {
+    if (hear.classList.contains('playing')) { v.pause(); v.muted = true; hear.classList.remove('playing'); hear.textContent = 'Hear me say hi'; return; }
+    hear.classList.add('playing');
+    hear.textContent = 'Stop';
+    start(true);
+  });
+  // Starts once the page has opened, so the walk-in is seen from its first step.
+  const begin = () => (document.body.classList.contains('ready') ? setTimeout(() => start(false), 700) : setTimeout(begin, 120));
+  begin();
+  document.getElementById('play-intro')?.addEventListener('click', () => { v.pause(); hear.classList.remove('playing'); hear.textContent = 'Hear me say hi'; });
+}
+
 export function initFx(c) {
   reveals();
   navHighlight();
   idCard();
   introVideo(c);
+  heroLive(c);
   orbit();
   if (finePointer && !reduceMotion) cursor();
 

@@ -12,6 +12,8 @@ export const CONTENT = {
   location: 'United States',
 
   photos: {
+    // The moving cut-out in the first screen (picture on the left half, matte on the right).
+    heroVideo: 'assets/walk.mp4',
     hero: 'assets/stand.png',
     about: 'assets/seated.png',
     work: 'assets/typing.png',
@@ -21,7 +23,7 @@ export const CONTENT = {
   // The intro video. "file" is a video file in this folder (for example
   // 'assets/intro.mp4'); when it is empty, the HeyGen player opens instead.
   intro: {
-    file: '',
+    file: 'assets/intro.mp4',
     embed: 'https://app.heygen.com/embeds/d5e0396f41864d9b81f1b7ef2c119aa1',
   },
 

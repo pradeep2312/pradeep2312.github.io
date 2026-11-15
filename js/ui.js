@@ -63,9 +63,24 @@ function hero(c) {
   });
   const cta = el('div', 'cta');
   cta.append(link('#work', 'See my work ↘', 'btn solid'));
-  const play = el('button', 'btn', '▶ Watch my intro');
+  // A round live preview of the talking intro; it opens the full video with sound.
+  const play = el('button', 'intro-pill');
   play.type = 'button';
   play.id = 'play-intro';
+  const bubble = el('span', 'bubble');
+  if (c.intro?.file) {
+    const pv = el('video');
+    pv.src = c.intro.file;
+    pv.muted = true;
+    pv.loop = true;
+    pv.autoplay = true;
+    pv.playsInline = true;
+    pv.setAttribute('aria-hidden', 'true');
+    bubble.append(pv);
+  }
+  const label = el('span', 'pill-text');
+  label.append(el('b', '', 'Watch my intro'), el('small', '', '20 sec · with sound'));
+  play.append(bubble, label, el('i', '', '▶'));
   cta.append(play);
   copy.append(hello, h1, el('p', 'lede', c.tagline), cta);
 
@@ -77,7 +92,17 @@ function hero(c) {
     sp.style.transitionDelay = `${0.1 + i * 0.05}s`;
     giant.append(sp);
   });
-  art.append(giant, img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo', false));
+  const stage = el('div', 'hero-stage');
+  stage.append(img(c.photos.hero, `Portrait of ${c.name}`, 'hero-photo', false));
+  if (c.photos.heroVideo) {
+    const cv = el('canvas', 'hero-live');
+    cv.setAttribute('aria-hidden', 'true');
+    const hear = el('button', 'hear', 'Hear me say hi');
+    hear.type = 'button';
+    hear.id = 'hear';
+    stage.append(cv);
+    art.append(giant, stage, hear);
+  } else art.append(giant, stage);
   s.append(copy, art);
   return s;
 }
