@@ -152,16 +152,15 @@ function introVideo() {
   }, { threshold: 0.25 }).observe(v);
 }
 
-// Skills revolve around the photo as glowing words on three tilted rings.
-// Each word grows and sharpens as it comes to the front, passes across the
-// figure, then shrinks and dims as it goes round the back.
+// Skills revolve around a glowing core as words on three tilted rings.
+// Each word grows and sharpens as it comes to the front, then shrinks and dims as it goes round the back.
 function orbit() {
   const box = document.querySelector('.orbit');
   const words = [...box.querySelectorAll('.word')];
   const rings = [
-    { rx: 0.44, ry: 0.07, cy: -0.2, speed: 0.34 },
-    { rx: 0.5, ry: 0.09, cy: 0.04, speed: -0.26 },
-    { rx: 0.4, ry: 0.07, cy: 0.27, speed: 0.3 },
+    { rx: 0.44, ry: 0.07, cy: -0.24, speed: 0.34 },
+    { rx: 0.5, ry: 0.09, cy: 0, speed: -0.26 },
+    { rx: 0.4, ry: 0.07, cy: 0.24, speed: 0.3 },
   ];
   const per = rings.map((_, r) => words.filter((__, i) => i % rings.length === r).length);
   const place = (t) => {
